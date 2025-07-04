@@ -1,6 +1,7 @@
 'use client';
 
 import InternshipCard from '@/components/InternshipCard';
+import SelectElement from '@/components/SelectElement';
 import { countries } from '@/utils/countries';
 import { useEffect, useState } from 'react';
 
@@ -13,6 +14,12 @@ export default function SearchWithFilters() {
         postDate: '',
         offset: 0,
     });
+
+    const opportunitiesType: string[] = [
+        "Internship",
+        "Scholarship",
+        "Remote job",
+    ]
 
     const [internships, setInternships] = useState<Internship[]>([]);
     const [scholarships, setScholarships] = useState<[]>([]);
@@ -166,15 +173,12 @@ export default function SearchWithFilters() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Type
                             </label>
-                            <select
-                                value={filters.type}
-                                onChange={(e) => handleFilterChange('type', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                <option value="internship">Internship</option>
-                                <option value="scholarship">Scholarship</option>
-                                <option value="remote-job">Remote Job</option>
-                            </select>
+                            <SelectElement
+                                options={opportunitiesType.map(type => ({ name: type }))}
+                                value={filters.type || "Internship"}
+                                onChange={(val) => handleFilterChange('type', val)}
+                                placeholder="Select type"
+                            />
                         </div>
 
                         {/* Country Filter */}
@@ -182,15 +186,7 @@ export default function SearchWithFilters() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Country
                             </label>
-                            <select
-                                value={filters.country}
-                                onChange={(e) => handleFilterChange('country', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                                {countries.map(country => (
-                                    <option key={country.name} value={country.name}>{country.name}</option>
-                                ))}
-                            </select>
+                            <SelectElement options={countries} value={filters.country} onChange={(val) => handleFilterChange('country', val)} />
                         </div>
 
                         {/* Keyword Filter */}
@@ -267,7 +263,7 @@ export default function SearchWithFilters() {
                     </button>
                     <span>Page {Math.floor(filters.offset / 10) + 1}</span>
                     <button
-                    disabled={internships.length < 10}
+                        disabled={internships.length < 10}
                         onClick={() => {
                             setFilters(prev => ({ ...prev, offset: prev.offset + 10 }));
                             handleSearch();

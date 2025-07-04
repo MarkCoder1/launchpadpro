@@ -97,7 +97,7 @@ function InternshipCard({ internship }: InternshipCardProps) {
                         href={internship.organization_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200 items-center flex"
+                        className="flex  items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                     >
                         Company
                     </a>
