@@ -6,14 +6,15 @@ export const getScholarships = async (
   setTotalResults: Dispatch<SetStateAction<number>>,
   setScholarships: Dispatch<SetStateAction<Scholarship[]>>
 ) => {
-  const userQuery = `${filters.keyword || "fully funded"} scholarships ${filters.country ? " in " + filters.country : ""} ${filters.postDate ? "posted after " + filters.postDate : ""}`;
+  const userQuery = `${filters.keyword || "fully funded"} scholarships ${
+    filters.country ? " in " + filters.country : ""
+  } ${filters.postDate ? "posted after " + filters.postDate : ""}`;
 
   console.log("query ad ", userQuery);
-  
 
   const requestData = {
     query: userQuery,
-    page: page || 1, 
+    page: page || 1,
   };
   console.log("📤 Sending scholarships request data:", requestData);
 

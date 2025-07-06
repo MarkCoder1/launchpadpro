@@ -6,11 +6,10 @@ import { countries } from '@/utils/countries'
 const SearchFilters = ({ handleFilterChange, filters, handleSearch, loading, clearFilters }: { handleFilterChange: (arg0: keyof SearchFilters, arg1: string) => void, filters: SearchFilters, handleSearch: () => void, loading: boolean, clearFilters: () => void }) => {
     return (
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-2">
                 {/* Type Filter */}
                 <div>
-
-                    <label className="\text-sm font-medium text-gray-700 mb-2 flex justify-between">
+                    <label className="text-sm font-medium text-gray-700 mb-2 flex justify-between">
                         Type
                         {filters.type === "job" && <label>
                             <input className='mr-1' type="checkbox" onChange={() => handleFilterChange("isRemote", `${!filters.isRemote}`)} />

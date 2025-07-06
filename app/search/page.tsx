@@ -1,12 +1,11 @@
 'use client';
 
 import InternshipCard from '@/components/InternshipCard';
-
 import { useEffect, useState } from 'react';
 import { getInternships } from '../../utils/get_internships';
 import { getJobs } from '@/utils/get_jobs';
 import JobCard from '@/components/JobCard';
-import SearchFilters from '@/components/SearchFilters';
+import SearchFilters from '../../components/SearchFilters'; 
 import TotalResults from '@/components/TotalResults';
 import Pagination from '@/components/Pagination';
 import Loading from '@/components/Loading';
@@ -27,7 +26,6 @@ export default function SearchWithFilters() {
     });
 
 
-
     const [internships, setInternships] = useState<Internship[]>([]);
     const [scholarships, setScholarships] = useState<Scholarship[]>([]);
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -40,8 +38,6 @@ export default function SearchWithFilters() {
         setFilters(updatedFilters);
 
         if (key === "type") handleSearch();
-        console.log("typo ", value, filters.type);
-
     };
 
 
@@ -108,8 +104,7 @@ export default function SearchWithFilters() {
 
     useEffect(() => {
         handleSearch();
-    }, [filters.offset, filters.type]);
-
+    }, [])
 
     return (
         <div className="min-h-screen py-8">
