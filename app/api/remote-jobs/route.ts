@@ -1,10 +1,11 @@
-// app/api/internships/route.ts
+// app/api/remote-jobs/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import https from "https";
+import { Trykker } from "next/font/google";
 
 export async function POST(request: NextRequest) {
   try {
-    const removeDuplicateByTitle = (arr: { title: string }[]) => {
+    const removeDuplicateByTitle = (arr: Job[]) => {
       const seen = new Set();
       return arr.filter((item) => {
         if (seen.has(item.title)) return false;
@@ -17,7 +18,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log("Received request body:", body);
 
-    const { keyword, country, postDate, offset, LogicalOperator } = body;
+    const { keyword, country, postDate, offset, LogicalOperator, isRemote } =
+      body;
 
     // More flexible validation - allow search with just keyword OR country
     if (!keyword && !country) {
@@ -57,20 +59,26 @@ export async function POST(request: NextRequest) {
       if (postDate && postDate.trim()) {
         searchParams.set("date_filter", postDate.trim());
       }
+      if (isRemote === "true") {
+        searchParams.set("remote", "true");
+      } else {
+        searchParams.delete("remote");
+      }
 
       searchParams.set("offset", offset?.toString() || "0");
 
       console.log("API Query params:", searchParams.toString());
-      return searchParams
+      return searchParams;
     };
 
     const options = {
       method: "GET",
-      hostname: "internships-api.p.rapidapi.com",
-      path: `/active-jb-7d?${buildParams().toString()}`,
+      hostname: "active-jobs-db.p.rapidapi.com",
+      port: null,
+      path: `/active-ats-7d?limit=12&${buildParams().toString()}`,
       headers: {
-        "x-rapidapi-host": "internships-api.p.rapidapi.com",
         "x-rapidapi-key": process.env.RAPID_API_KEY,
+        "x-rapidapi-host": "active-jobs-db.p.rapidapi.com",
       },
     };
 

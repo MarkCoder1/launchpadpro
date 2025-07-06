@@ -53,7 +53,7 @@ const SelectElement: React.FC<CustomSelectProps> = ({
                     {options.map((option) => (
                         <li
                             key={option.name}
-                            onClick={() => handleSelect(option.name)}
+                            onClick={() => handleSelect(option.name.toLowerCase())}
                             className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${option.name === value ? 'bg-blue-50 font-semibold' : ''
                                 }`}
                         >

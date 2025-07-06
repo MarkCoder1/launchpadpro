@@ -24,7 +24,7 @@ export default function Home() {
         <h1 className="mb-5">Launchpad Pro!</h1>
           </div>
           {/*brief */}
-          <span className="font-semibold mb-5">Find scholarships, internships & remote jobs — all in one place.<br />
+          <span className="font-semibold mb-5">Find scholarships, internships & jobs — all in one place.<br />
         Save your favorites, get deadline reminders, and level up your future!</span>
           <GetStartedButton />
         </div>

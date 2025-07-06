@@ -1,5 +1,6 @@
 import { formatDate } from '@/utils/dateformat';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type InternshipCardProps = {
     internship: Internship;
@@ -17,16 +18,18 @@ function InternshipCard({ internship }: InternshipCardProps) {
             <div className="flex items-start gap-4 mb-4">
                 <div className="flex-shrink-0">
                     {internship.organization_logo ? (
-                        <Image
-                            src={internship.organization_logo}
-                            alt={`${internship.organization} logo`}
-                            width={60}
-                            height={60}
-                            className="rounded-lg object-cover"
-                            onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
-                        />
+                        <Link href={internship.organization_url} target='_blank' rel="noopener noreferrer">
+                            <Image
+                                src={internship.organization_logo}
+                                alt={`${internship.organization} logo`}
+                                width={60}
+                                height={60}
+                                className="rounded-lg object-cover"
+                                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                            />
+                        </Link>
                     ) : (
-                        <div className="w-15 h-15 bg-gray-300 rounded-lg flex items-center justify-center">
+                        <div className="w-[60px] h-[60px] bg-gray-300 rounded-lg flex items-center justify-center">
                             <span className="text-gray-600 text-xs font-medium">
                                 {internship.organization.substring(0, 2).toUpperCase()}
                             </span>
@@ -38,19 +41,8 @@ function InternshipCard({ internship }: InternshipCardProps) {
                     <p className="text-lg text-gray-700 font-medium mb-2">{internship.organization}</p>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">📍 {location}</span>
-                        <span className="flex items-center gap-1">📅 Posted {formatDate(internship.date_posted)}</span>
                     </div>
                 </div>
-            </div>
-            <div className="mb-4">
-                <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
-                    {internship.linkedin_org_size && <span>🏢 {internship.linkedin_org_size}</span>}
-                    {internship.linkedin_org_industry && <span>🏭 {internship.linkedin_org_industry}</span>}
-                    {internship.linkedin_org_headquarters && <span>📍 HQ: {internship.linkedin_org_headquarters}</span>}
-                </div>
-                {internship.linkedin_org_slogan && (
-                    <p className="text-sm text-gray-600 italic mb-2">"{internship.linkedin_org_slogan}"</p>
-                )}
             </div>
             <div className="mb-4">
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -65,14 +57,6 @@ function InternshipCard({ internship }: InternshipCardProps) {
                 </div>
                 <p className="text-sm text-gray-600">Valid until: {formatDate(internship.date_validthrough)}</p>
             </div>
-            {internship.recruiter_name && (
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-900">👤 {internship.recruiter_name}</p>
-                    {internship.recruiter_title && (
-                        <p className="text-xs text-gray-600 mt-1">{internship.recruiter_title}</p>
-                    )}
-                </div>
-            )}
             <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <a
                     href={internship.url}
@@ -90,16 +74,6 @@ function InternshipCard({ internship }: InternshipCardProps) {
                         className="flex-1 bg-green-600 text-white text-center py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
                     >
                         Apply Direct
-                    </a>
-                )}
-                {internship.organization_url && (
-                    <a
-                        href={internship.organization_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex  items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                    >
-                        Company
                     </a>
                 )}
             </div>

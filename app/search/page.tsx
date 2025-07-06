@@ -1,42 +1,54 @@
 'use client';
 
 import InternshipCard from '@/components/InternshipCard';
-import SelectElement from '@/components/SelectElement';
-import { countries } from '@/utils/countries';
-import { useEffect, useState } from 'react';
 
+import { useEffect, useState } from 'react';
+import { getInternships } from '../../utils/get_internships';
+import { getJobs } from '@/utils/get_jobs';
+import JobCard from '@/components/JobCard';
+import SearchFilters from '@/components/SearchFilters';
+import TotalResults from '@/components/TotalResults';
+import Pagination from '@/components/Pagination';
+import Loading from '@/components/Loading';
+import { ClearSearchFilters } from '@/utils/ClearSearchFilters';
+import { getScholarships } from '@/utils/get_scholarships';
+import ScholarshipCard from '@/components/ScholarshipCard';
 
 export default function SearchWithFilters() {
+
     const [filters, setFilters] = useState<SearchFilters>({
         type: 'internship',
         country: 'United States',
         keyword: '',
         postDate: '',
         offset: 0,
+        LogicalOperator: 'AND',
+        isRemote: false
     });
 
-    const opportunitiesType: string[] = [
-        "Internship",
-        "Scholarship",
-        "Remote job",
-    ]
+
 
     const [internships, setInternships] = useState<Internship[]>([]);
-    const [scholarships, setScholarships] = useState<[]>([]);
-    const [remoteJobs, setRemoteJobs] = useState<[]>([]);
+    const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+    const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(false);
     const [totalResults, setTotalResults] = useState(0);
 
 
-    const handleFilterChange = (key: keyof SearchFilters, value: string) => {
-        setFilters(prev => ({
-            ...prev,
-            [key]: value
-        }));
+    const handleFilterChange = async (key: keyof SearchFilters, value: string) => {
+        const updatedFilters = { ...filters, [key]: value, offset: 0 };
+        setFilters(updatedFilters);
+
+        if (key === "type") handleSearch();
+        console.log("typo ", value, filters.type);
+
     };
+
+
 
     const handleSearch = async () => {
         setLoading(true);
+
         try {
             console.log('Current filters state:', filters);
 
@@ -48,77 +60,26 @@ export default function SearchWithFilters() {
             }
 
             if (filters.type === "internship") {
-                console.log("Searching for internships...");
+                setLoading(true)
+                await getInternships(filters, setTotalResults, setInternships);
+                setLoading(false)
+            }
+            else if (filters.type == "job") {
+                setLoading(true)
 
-                // Prepare the request data
-                const requestData = {
-                    keyword: filters.keyword || '',
-                    country: filters.country || '',
-                    postDate: filters.postDate || '',
-                    offset: filters.offset || 0,
-                };
+                await getJobs(filters, setTotalResults, setJobs);
 
-                console.log("Sending request data:", requestData);
+                setLoading(false)
+                console.log("jobs ", jobs);
+            }
+            else if (filters.type === "scholarship") {
+                setLoading(true)
 
-                const response = await fetch('/api/internships', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
+                const page = filters.offset / 10 + 1;
+                await getScholarships(page, filters, setTotalResults, setScholarships);
 
-                console.log("Response status:", response.status);
-                console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-
-                // Get response text first to see what we're getting
-                const responseText = await response.text();
-
-                if (!response.ok) {
-                    let errorData;
-                    try {
-                        errorData = JSON.parse(responseText);
-                    } catch {
-                        errorData = { error: responseText };
-                    }
-
-                    console.error("API Error Response:", errorData);
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
-                }
-
-                // Parse the response
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error("JSON Parse Error:", parseError);
-                    throw new Error("Invalid JSON response from server");
-                }
-
-                console.log("Parsed API Response:", data);
-
-                // Handle the response based on the actual API structure
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                // Update results based on the actual response structure
-                // You might need to adjust this based on what the API actually returns
-                if (data && Array.isArray(data)) {
-                    setInternships(data);
-                    setTotalResults(data.length);
-                } else if (data && data.internships && Array.isArray(data.internships)) {
-                    setInternships(data.internships);
-                    setTotalResults(data.internships.length);
-                } else if (data && data.data && Array.isArray(data.data)) {
-                    setInternships(data.data);
-                    setTotalResults(data.data.length);
-                } else {
-                    console.log("Unexpected response structure:", data);
-                    setInternships([]);
-                    setTotalResults(0);
-                }
+                setLoading(false)
+                console.log("scholars ", scholarships);
             }
 
         } catch (error) {
@@ -134,6 +95,8 @@ export default function SearchWithFilters() {
             }
 
             setInternships([]);
+            setJobs([]);
+            setScholarships([]);
             setTotalResults(0);
         } finally {
             setLoading(false);
@@ -141,21 +104,11 @@ export default function SearchWithFilters() {
     };
 
 
-    const clearFilters = () => {
-        setFilters({
-            type: '',
-            country: '',
-            keyword: '',
-            postDate: '',
-            offset: 0,
-        });
-        setInternships([]);
-        setTotalResults(0);
-    };
+
 
     useEffect(() => {
         handleSearch();
-    }, [filters.offset]);
+    }, [filters.offset, filters.type]);
 
 
     return (
@@ -166,126 +119,45 @@ export default function SearchWithFilters() {
                 </h1>
 
                 {/* Search Filters */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-                        {/* Type Filter */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Type
-                            </label>
-                            <SelectElement
-                                options={opportunitiesType.map(type => ({ name: type }))}
-                                value={filters.type || "Internship"}
-                                onChange={(val) => handleFilterChange('type', val)}
-                                placeholder="Select type"
-                            />
-                        </div>
+                <SearchFilters
+                    filters={filters}
+                    loading={loading}
+                    handleFilterChange={handleFilterChange}
+                    handleSearch={handleSearch}
+                    clearFilters={() =>
+                        ClearSearchFilters({
+                            setFilters,
+                            setInternships,
+                            setJobs,
+                            setScholarships,
+                            setTotalResults
+                        })
+                    }
+                />
 
-                        {/* Country Filter */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Country
-                            </label>
-                            <SelectElement options={countries} value={filters.country} onChange={(val) => handleFilterChange('country', val)} />
-                        </div>
-
-                        {/* Keyword Filter */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Keyword
-                            </label>
-                            <input
-                                type="text"
-                                value={filters.keyword}
-                                onChange={(e) => handleFilterChange('keyword', e.target.value)}
-                                placeholder="Search keywords..."
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-
-                        {/* Post Date Filter */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Posted After
-                            </label>
-                            <input
-                                type="date"
-                                value={filters.postDate}
-                                onChange={(e) => handleFilterChange('postDate', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-
-                        {/* Search Button */}
-                        <div className="flex items-end">
-                            <button
-                                onClick={handleSearch}
-                                disabled={loading}
-                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                {loading ? 'Searching...' : 'Search'}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Clear Filters Button */}
-                    <div className="flex justify-end">
-                        <button
-                            onClick={clearFilters}
-                            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                        >
-                            Clear Filters
-                        </button>
-                    </div>
-                </div>
+                {/*Pagination */}
+                <Pagination setFilters={setFilters} filters={filters} handleSearch={handleSearch} totalResults={totalResults} />
 
                 {/* Results Header */}
-                {totalResults > 0 && (
-                    <div className="mb-6">
-                        <p className="text-gray-600">
-                            Found {totalResults} result{totalResults !== 1 ? 's' : ''}
-                        </p>
-                    </div>
-                )}
-
-                <div className="flex items-center gap-4 my-6">
-                    <button
-                        onClick={() => {
-                            if (filters.offset >= 10) {
-                                setFilters(prev => ({ ...prev, offset: prev.offset - 10 }));
-                                handleSearch(); // manually re-trigger search
-                            }
-                        }}
-                        disabled={filters.offset === 0}
-                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50"
-                    >
-                        Previous
-                    </button>
-                    <span>Page {Math.floor(filters.offset / 10) + 1}</span>
-                    <button
-                        disabled={internships.length < 10}
-                        onClick={() => {
-                            setFilters(prev => ({ ...prev, offset: prev.offset + 10 }));
-                            handleSearch();
-                        }}
-                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded disabled:opacity-50"
-                    >
-                        Next
-                    </button>
-                </div>
+                <TotalResults totalResults={totalResults} />
 
                 {/* Loading State */}
-                {loading && (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                    </div>
-                )}
+                {loading && <Loading />}
 
                 {/* Results Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filters.type === 'internship' && internships.map((item, idx) => (
                         <InternshipCard key={item.id || idx} internship={item} />
                     ))}
+
+                    {(filters.type === 'job' && jobs.length > 0) && jobs.map((item, idx) => (
+                        <JobCard key={item.id || idx} job={item} />
+                    ))}
+
+                    {(filters.type === 'scholarship' && scholarships.length > 0) && scholarships.map((item, idx) => (
+                        <ScholarshipCard scholarship={item} key={idx} />
+                    ))}
+                    
                 </div>
 
                 {/* No Results */}
