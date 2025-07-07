@@ -19,8 +19,9 @@ module.exports = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        buttonStart: "#ea580c",
-        buttonEnd: "#f59e0b",
+        getStartedButtonStart: "#00d2ff",
+        getStartedButtonEnd: "#3a7bd5",
+        registerRightPanel: "#3b82f6",
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

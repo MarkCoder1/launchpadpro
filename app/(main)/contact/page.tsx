@@ -61,7 +61,7 @@ const Page = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300"
+                                className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                             />
                         </div>
                         <div>
@@ -72,7 +72,7 @@ const Page = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300"
+                                className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                             />
                         </div>
                     </div>
@@ -86,7 +86,7 @@ const Page = () => {
                             value={formData.subject}
                             onChange={handleChange}
                             required
-                            className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300"
+                            className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                         />
                     </div>
 
@@ -99,7 +99,7 @@ const Page = () => {
                             onChange={handleChange}
                             required
                             rows={8}
-                            className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 resize-none"
+                            className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300 resize-none"
                         />
                     </div>
 
@@ -107,7 +107,7 @@ const Page = () => {
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            className="px-8 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg border-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-900"
+                            className="px-8 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-sky-900"
                         >
                             Send
                         </button>

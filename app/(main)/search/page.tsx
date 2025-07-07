@@ -2,10 +2,10 @@
 
 import InternshipCard from '@/components/InternshipCard';
 import { useEffect, useState } from 'react';
-import { getInternships } from '../../utils/get_internships';
+import { getInternships } from '../../../utils/get_internships';
 import { getJobs } from '@/utils/get_jobs';
 import JobCard from '@/components/JobCard';
-import SearchFilters from '../../components/SearchFilters'; 
+import SearchFilters from '../../../components/SearchFilters';
 import TotalResults from '@/components/TotalResults';
 import Pagination from '@/components/Pagination';
 import Loading from '@/components/Loading';
@@ -37,59 +37,36 @@ export default function SearchWithFilters() {
         const updatedFilters = { ...filters, [key]: value, offset: 0 };
         setFilters(updatedFilters);
 
-        if (key === "type") handleSearch();
+        if (key !== "keyword" && key !== "postDate") handleSearch(updatedFilters);
     };
 
 
 
-    const handleSearch = async () => {
+    const handleSearch = async (passedFilters?: SearchFilters) => {
+        const activeFilters = passedFilters || filters;
+
+        console.log("typos", activeFilters.type);
         setLoading(true);
 
         try {
-            console.log('Current filters state:', filters);
-
-            // Validate filters before sending
-            if (!filters.keyword && !filters.country) {
+            if (!activeFilters.keyword && !activeFilters.country) {
                 alert('Please enter at least a keyword or select a country');
                 setLoading(false);
                 return;
             }
 
-            if (filters.type === "internship") {
-                setLoading(true)
-                await getInternships(filters, setTotalResults, setInternships);
-                setLoading(false)
-            }
-            else if (filters.type == "job") {
-                setLoading(true)
-
-                await getJobs(filters, setTotalResults, setJobs);
-
-                setLoading(false)
-                console.log("jobs ", jobs);
-            }
-            else if (filters.type === "scholarship") {
-                setLoading(true)
-
-                const page = filters.offset / 10 + 1;
-                await getScholarships(page, filters, setTotalResults, setScholarships);
-
-                setLoading(false)
-                console.log("scholars ", scholarships);
+            if (activeFilters.type === "internship") {
+                await getInternships(activeFilters, setTotalResults, setInternships);
+            } else if (activeFilters.type === "job") {
+                await getJobs(activeFilters, setTotalResults, setJobs);
+            } else if (activeFilters.type === "scholarship") {
+                const page = activeFilters.offset / 10 + 1;
+                await getScholarships(page, activeFilters, setTotalResults, setScholarships);
             }
 
         } catch (error) {
             console.error('Search error:', error);
-
-            if (error instanceof Error) {
-                console.error('Error message:', error.message);
-                // Show user-friendly error message
-                alert(`Search failed: ${error.message}`);
-            } else {
-                console.error('Unknown error:', error);
-                alert('An unexpected error occurred during search');
-            }
-
+            alert('An unexpected error occurred during search');
             setInternships([]);
             setJobs([]);
             setScholarships([]);
@@ -98,6 +75,7 @@ export default function SearchWithFilters() {
             setLoading(false);
         }
     };
+
 
 
 
@@ -152,7 +130,7 @@ export default function SearchWithFilters() {
                     {(filters.type === 'scholarship' && scholarships.length > 0) && scholarships.map((item, idx) => (
                         <ScholarshipCard scholarship={item} key={idx} />
                     ))}
-                    
+
                 </div>
 
                 {/* No Results */}

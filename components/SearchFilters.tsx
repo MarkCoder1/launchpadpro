@@ -58,7 +58,7 @@ const SearchFilters = ({ handleFilterChange, filters, handleSearch, loading, cle
                         value={filters.keyword}
                         onChange={(e) => handleFilterChange('keyword', e.target.value)}
                         placeholder="Search keywords..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                     />
                 </div>
 
@@ -71,7 +71,7 @@ const SearchFilters = ({ handleFilterChange, filters, handleSearch, loading, cle
                         type="date"
                         value={filters.postDate}
                         onChange={(e) => handleFilterChange('postDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                     />
                 </div>
 
@@ -80,7 +80,7 @@ const SearchFilters = ({ handleFilterChange, filters, handleSearch, loading, cle
                     <button
                         onClick={handleSearch}
                         disabled={loading}
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-full px-4 py-2 bg-sky-400 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 x     disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {loading ? 'Searching...' : 'Search'}
                     </button>
@@ -91,7 +91,7 @@ const SearchFilters = ({ handleFilterChange, filters, handleSearch, loading, cle
             <div className="flex justify-end">
                 <button
                     onClick={clearFilters}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    className="px-4 py-2 text-sky-500 hover:text-gray-800 transition-colors"
                 >
                     Clear Filters
                 </button>

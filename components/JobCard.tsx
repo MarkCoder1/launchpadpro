@@ -1,4 +1,5 @@
 import { formatDate } from '@/utils/dateformat';
+import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -43,6 +44,9 @@ function JobCard({ job }: JobCardProps) {
         <div className="flex-1 min-w-0">
           <h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">{job.title}</h3>
           <p className="text-lg text-gray-700 font-medium mb-2">{job.organization}</p>
+          {job.organization_url && <Link href={job.organization_url} target="_blank" className="translate-y-5px">
+            <ExternalLink size={20} />
+          </Link>}
           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
             <span className="flex items-center gap-1">📍 {location}</span>
           </div>

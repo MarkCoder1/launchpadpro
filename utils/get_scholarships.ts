@@ -6,9 +6,10 @@ export const getScholarships = async (
   setTotalResults: Dispatch<SetStateAction<number>>,
   setScholarships: Dispatch<SetStateAction<Scholarship[]>>
 ) => {
+  const currentDate = new Date();
   const userQuery = `${filters.keyword || "fully funded"} scholarships ${
-    filters.country ? " in " + filters.country : ""
-  } ${filters.postDate ? "posted after " + filters.postDate : ""}`;
+    filters.country ? "in " + filters.country : ""
+  } ${filters.postDate ? "posted after " + filters.postDate : "posted after " + currentDate.getFullYear()}`;
 
   console.log("query ad ", userQuery);
 

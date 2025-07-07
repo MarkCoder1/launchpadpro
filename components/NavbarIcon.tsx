@@ -11,7 +11,7 @@ const NavbarIcon = ({ icon, text, link }: { icon: React.ReactElement, text: stri
                 </div>
 
                 {/* Text */}
-                <div className="absolute inset-0 flex items-center justify-center text-gray-700 font-medium text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 flex items-center justify-center text-gray-700 font-medium text-2xl opacity-0 group-hover:opacity-100 transition-opacity hover:border-b-2 border-sky-500 w-fit duration-300">
                     {text}
                 </div>
             </div>

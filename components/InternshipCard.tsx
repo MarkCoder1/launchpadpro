@@ -2,7 +2,6 @@ import { formatDate } from '@/utils/dateformat';
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import ExpandedClickLink from './ExpandedClickLink';
 
 type InternshipCardProps = {
     internship: Internship;
@@ -42,7 +41,9 @@ function InternshipCard({ internship }: InternshipCardProps) {
                     <h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-2">{internship.title}</h3>
                     <div className='flex gap-x-3'>
                         <p className="text-lg text-gray-700 font-medium mb-2">{internship.organization}</p>
-                        <ExpandedClickLink link={internship.organization_url} />
+                        <Link href={internship.organization_url} target="_blank" className="translate-y-5px">
+                            <ExternalLink size={20} />
+                        </Link>
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                         <span className="flex items-center gap-1">📍 {location}</span>

@@ -12,7 +12,7 @@ export const ClearSearchFilters = ({
   setTotalResults: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   setFilters({
-    type: "",
+    type: "internship",
     country: "",
     keyword: "",
     postDate: "",

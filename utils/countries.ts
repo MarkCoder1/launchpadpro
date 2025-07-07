@@ -40,7 +40,6 @@ export const countries = [
   { code: 'PE', name: 'Peru', flag: '🇵🇪' },
   { code: 'PL', name: 'Poland', flag: '🇵🇱' },
   { code: 'PT', name: 'Portugal', flag: '🇵🇹' },
-  { code: 'REMOTE', name: 'Remote', flag: '🌐' },
   { code: 'RO', name: 'Romania', flag: '🇷🇴' },
   { code: 'RS', name: 'Serbia', flag: '🇷🇸' },
   { code: 'RU', name: 'Russia', flag: '🇷🇺' },

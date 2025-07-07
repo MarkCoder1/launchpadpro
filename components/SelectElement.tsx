@@ -43,7 +43,7 @@ const SelectElement: React.FC<CustomSelectProps> = ({
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex justify-between items-center px-3 py-2 border border-gray-300 rounded-md bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full flex justify-between items-center px-3 py-2 border border-gray-300 rounded-md bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
                 <span>{value || placeholder}</span>
                 <ChevronDown className="h-4 w-4 text-gray-500" />
