@@ -1,97 +1,155 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent } from "../../../components/ui/card";
 
 export default function LoginPage() {
-    const [loading, setLoading] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-    const validate = () => {
-        const newErrors: typeof errors = {};
-        if (!email) {
-            newErrors.email = "Email is required.";
-        } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-            newErrors.email = "Enter a valid email address.";
-        }
-        if (!password) {
-            newErrors.password = "Password is required.";
-        }
-        return newErrors;
-    };
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      router.push("/dashboard");
+    }
+  }, [session, status, router]);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const validationErrors = validate();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
-            return;
-        }
-        setErrors({});
-        setLoading(true);
-        // Add your login logic here
-    };
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
-    return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-tr from-careerpad-primary/50 to-careerpad-secondary/50">
-            <Link href="/" className="absolute top-4 left-4 text-md text-black-foreground hover:underline">
-                &larr; Back to Home
-            </Link>
-            <div className="w-full max-w-md rounded-2xl bg-white/90 shadow-xl p-8">
-                <h2 className="text-3xl font-bold text-center text-primary">CareerPad</h2>
-                <p className="text-center text-muted-foreground mt-1">Welcome back! Log in to continue.</p>
+  function validate() {
+    const newErrors = { email: "", password: "" };
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
+      newErrors.email = "Enter a valid email address.";
+    }
+    if (!form.password) {
+      newErrors.password = "Password is required.";
+    }
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
+  }
 
-                <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            className={`w-full mt-1 px-4 py-2 rounded-lg border ${
-                                errors.email ? "border-red-500" : "border-gray-300"
-                            } focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary`}
-                            placeholder="you@example.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                        />
-                        {errors.email && (
-                            <p className="text-xs text-red-500 mt-1">{errors.email}</p>
-                        )}
-                    </div>
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+    setFormError("");
+  }
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Password</label>
-                        <input
-                            type="password"
-                            className={`w-full mt-1 px-4 py-2 rounded-lg border ${
-                                errors.password ? "border-red-500" : "border-gray-300"
-                            } focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary`}
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                        />
-                        {errors.password && (
-                            <p className="text-xs text-red-500 mt-1">{errors.password}</p>
-                        )}
-                    </div>
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validate()) return;
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full mt-4 bg-primary text-white py-2 rounded-lg font-semibold shadow-md hover:bg-primary-dark transition-colors"
-                    >
-                        {loading ? "Logging in..." : "Log In"}
-                    </button>
-                </form>
+    setLoading(true);
+    setFormError("");
 
-                <p className="mt-6 text-center text-sm text-gray-600">
-                    Don’t have an account?{" "}
-                    <Link href="/register" className="text-primary font-medium hover:underline">
-                        Sign up
-                    </Link>
-                </p>
+    try {
+      const result = await signIn("credentials", {
+        email: form.email,
+        password: form.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setFormError("Invalid email or password.");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (err: any) {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 bg-gradient-to-bl from-careerpad-primary/50 to-careerpad-secondary/50">
+      <Link
+        href="/"
+        className="absolute top-4 left-4 text-md text-black-foreground hover:underline"
+      >
+        &larr; Back to Home
+      </Link>
+      <Card className="w-full max-w-md sm:max-w-lg md:max-w-xl shadow-lg rounded-2xl mx-2 sm:mx-0">
+        <CardContent className="p-4 sm:p-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-center mb-2">
+            Welcome Back
+          </h1>
+          <p className="text-center text-muted-foreground mb-6 text-sm sm:text-base">
+            Sign in to your account to continue your career journey
+          </p>
+
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input
+                name="email"
+                type="email"
+                className={`w-full rounded-lg border px-3 py-2 bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                  errors.email ? "border-red-500" : ""
+                }`}
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={handleChange}
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+              )}
             </div>
-        </div>
-    );
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <input
+                name="password"
+                type="password"
+                className={`w-full rounded-lg border px-3 py-2 bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                  errors.password ? "border-red-500" : ""
+                }`}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            {formError && (
+              <div className="text-red-500 text-sm text-center">
+                {formError}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-primary text-primary-foreground"
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+
+          <p className="text-sm text-center mt-6 text-muted-foreground">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-primary hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </main>
+  );
 }

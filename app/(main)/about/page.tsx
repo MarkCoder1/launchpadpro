@@ -1,5 +1,5 @@
 'use client'
-import GetStartedButton from "@/components/GetStartedButton";
+import GetStartedButton from "../../../components/GetStartedButton";
 
 export default function About() {
     return (

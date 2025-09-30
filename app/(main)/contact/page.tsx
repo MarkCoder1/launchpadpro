@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 interface FormData {
     name: string;
@@ -25,32 +25,36 @@ const Page = () => {
     };
 
     useEffect(() => {
-        document.body.style.overflow = "hidden";
-
+        const isMobile = window.innerWidth < 768;
+        document.body.style.overflow = isMobile ? "auto" : "hidden";
         return () => {
-            // Re-enable scroll when component unmounts
             document.body.style.overflow = "auto";
         };
-    }, [])
+    }, []);
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-black">
-            <div className="flex flex-row justify-between items-center w-full max-w-5xl">
+        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-black px-4">
+            <div className="flex flex-col md:flex-row justify-between items-center w-full max-w-5xl gap-8 md:gap-16">
                 {/* text */}
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col mb-8 md:mb-0">
                     {/*title */}
-                    <div className="text-5xl font-bold tracking-wider flex-shrink-0">
+                    <div className="text-3xl md:text-5xl font-bold tracking-wider flex-shrink-0">
                         <h1 className="mb-3">Contact Me!</h1>
                     </div>
                     {/*brief */}
                     <span className='mb-4 font-bold'>
                         Thank you for your interest in getting in touch!
                     </span>
-
-                    <span className='font-bold max-w-96'>I value open communication and welcome any inquiries, feedback, or collaboration opportunities. Please don&apos;t hesitate to get in touch with me by filling out the contact form, especially if you find any errors!</span>
+                    <span className='font-bold max-w-full md:max-w-96'>
+                        I value open communication and welcome any inquiries, feedback, or collaboration opportunities. Please don&apos;t hesitate to get in touch with me by filling out the contact form, especially if you find any errors!
+                    </span>
                 </div>
-                {/* image */}
-                <form action="https://formsubmit.co/marcalber59@gmail.com" method='POST' className="space-y-4 mt-24">
+                {/* form */}
+                <form
+                    action="https://formsubmit.co/marcalber59@gmail.com"
+                    method='POST'
+                    className="space-y-4 w-full max-w-md"
+                >
                     {/* Name and Email Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -61,7 +65,7 @@ const Page = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="shadow-md w-full px-4 py-3   placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
+                                className="shadow-md w-full px-4 py-3 placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                             />
                         </div>
                         <div>
@@ -72,11 +76,10 @@ const Page = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="shadow-md w-full px-4 py-3  placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
+                                className="shadow-md w-full px-4 py-3 placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                             />
                         </div>
                     </div>
-
                     {/* Subject Field */}
                     <div>
                         <input
@@ -86,10 +89,9 @@ const Page = () => {
                             value={formData.subject}
                             onChange={handleChange}
                             required
-                            className="shadow-md w-full px-4 py-3  placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
+                            className="shadow-md w-full px-4 py-3 placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                         />
                     </div>
-
                     {/* Message Field */}
                     <div>
                         <textarea
@@ -99,10 +101,9 @@ const Page = () => {
                             onChange={handleChange}
                             required
                             rows={8}
-                            className="shadow-md w-full px-4 py-3  placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300 resize-none"
+                            className="shadow-md w-full px-4 py-3 placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300 resize-none"
                         />
                     </div>
-
                     {/* Submit Button */}
                     <div className="flex justify-end">
                         <button
@@ -114,7 +115,7 @@ const Page = () => {
                     </div>
                 </form>
             </div>
-        </div >
+        </div>
     )
 }
 
