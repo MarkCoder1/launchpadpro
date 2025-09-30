@@ -34,7 +34,7 @@ const Page = () => {
     }, [])
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-300px)]">
+        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] text-black">
             <div className="flex flex-row justify-between items-center w-full max-w-5xl">
                 {/* text */}
                 <div className="flex-1 flex flex-col">
@@ -61,7 +61,7 @@ const Page = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
+                                className="shadow-md w-full px-4 py-3   placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                             />
                         </div>
                         <div>
@@ -72,7 +72,7 @@ const Page = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
+                                className="shadow-md w-full px-4 py-3  placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                             />
                         </div>
                     </div>
@@ -86,7 +86,7 @@ const Page = () => {
                             value={formData.subject}
                             onChange={handleChange}
                             required
-                            className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
+                            className="shadow-md w-full px-4 py-3  placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300"
                         />
                     </div>
 
@@ -99,7 +99,7 @@ const Page = () => {
                             onChange={handleChange}
                             required
                             rows={8}
-                            className="shadow-md w-full px-4 py-3  text-white placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300 resize-none"
+                            className="shadow-md w-full px-4 py-3  placeholder-gray-400 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-300 resize-none"
                         />
                     </div>
 

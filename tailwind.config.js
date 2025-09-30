@@ -22,6 +22,13 @@ module.exports = {
         getStartedButtonStart: "#00d2ff",
         getStartedButtonEnd: "#3a7bd5",
         registerRightPanel: "#3b82f6",
+        careerpad: {
+          primary: "#4F46E5", // Indigo 600
+          secondary: "#10B981", // Emerald 500
+          dark: "#111827", // Gray 900
+          light: "#F9FAFB", // Gray 50
+          accent: "#9333EA", // Purple 600
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

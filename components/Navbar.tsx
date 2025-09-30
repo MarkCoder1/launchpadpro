@@ -10,21 +10,19 @@ export default function NavBar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
-        <nav className="text-black">
-            <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex h-16 items-center mt-8 justify-around">
+        <nav className="text-black bg-white">
+            <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex h-20 items-center mt-4 justify-around">
                     {/* Logo or Brand */}
                     <div className="font-bold text-xl">
                         <Link href="/">
-                            <Image src='/logo.png' alt={'logo'} width={120} height={120} />
+                            <Image src='/logo_fit.png' alt={'logo'} width={100} height={100} />
                         </Link>
                     </div>
 
                     {/* Desktop Menu */}
                     <div className="hidden md:flex space-x-48">
                         <NavbarIcon icon={<House strokeWidth={3} size={36} />} text="HOME" link="/" />
-
-                        <NavbarIcon icon={<Search strokeWidth={3} size={36} />} text="SEARCH" link="/search" />
 
                         <NavbarIcon icon={<Info strokeWidth={3} size={36} />} text="ABOUT" link="/about" />
 

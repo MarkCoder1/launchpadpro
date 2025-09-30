@@ -1,42 +1,116 @@
-import React from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
+"use client";
 
-const Page = () => {
+import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+export default function RegisterPage() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  function validate() {
+    const newErrors = { name: "", email: "", password: "" };
+    if (!form.name.trim()) newErrors.name = "Full name is required.";
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email)) {
+      newErrors.email = "Enter a valid email address.";
+    }
+    if (!form.password) {
+      newErrors.password = "Password is required.";
+    } else if (form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (validate()) {
+      // Submit logic here
+    }
+  }
+
   return (
-    <div className="h-screen flex justify-center items-center">
-      <div className="absolute top-0 left-0 z-10">
-        <Link href="/">
-          <Image src="/logo.png" alt="logo" width={100} height={100} />
-        </Link>
-      </div>
-      <div className="w-full max-w-6xl flex shadow-lg rounded-xl overflow-hidden bg-white">
+    <main className="min-h-screen flex items-center justify-center bg-background px-6 bg-gradient-to-bl from-careerpad-primary/50 to-careerpad-secondary/50">
+      <Link href="/" className="absolute top-4 left-4 text-md text-black-foreground hover:underline">
+        &larr; Back to Home
+      </Link>
+      <Card className="w-full max-w-md shadow-lg rounded-2xl">
+        <CardContent className="p-8">
+          <h1 className="text-2xl font-bold text-center mb-2">Create Your Account</h1>
+          <p className="text-center text-muted-foreground mb-6">
+            Start exploring careers, building your CV, and finding opportunities
+          </p>
 
-        {/* Left Side */}
-        <div className="relative w-1/2 bg-white p-8 flex justify-center items-center">
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+            <div>
+              <label className="block text-sm font-medium mb-1">Full Name</label>
+              <input
+                name="name"
+                type="text"
+                className={`w-full rounded-lg border px-3 py-2 bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${errors.name ? "border-red-500" : ""}`}
+                placeholder="John Doe"
+                value={form.name}
+                onChange={handleChange}
+              />
+              {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+            </div>
 
-          <div className="w-[400px] h-[600px] relative">
-            <Image
-              src="/register_image.png"
-              alt="Workflow"
-              fill
-              style={{ objectFit: 'contain' }}
-            />
-          </div>
-        </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input
+                name="email"
+                type="email"
+                className={`w-full rounded-lg border px-3 py-2 bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${errors.email ? "border-red-500" : ""}`}
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={handleChange}
+              />
+              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+            </div>
 
-        {/* Right Side */}
-        <div className="w-1/2 bg-registerRightPanel p-12">
-          <h2 className="text-5xl font-bold mb-6 text-center flex justify-center">Create Account</h2>
-          {/*Form */}
-          <div className='flex justify-center'>
-            asd
-          </div>
-        </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <input
+                name="password"
+                type="password"
+                className={`w-full rounded-lg border px-3 py-2 bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${errors.password ? "border-red-500" : ""}`}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+              />
+              {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+            </div>
 
-      </div>
-    </div>
-  )
+            <Button type="submit" className="w-full bg-primary text-primary-foreground">
+              Sign Up
+            </Button>
+          </form>
+
+          <p className="text-sm text-center mt-6 text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Log in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </main>
+  );
 }
-
-export default Page
