@@ -1,5 +1,5 @@
 'use client'
-import { House, Info, Mail, Menu, Search, X } from 'lucide-react';
+import { House, Info, Mail, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import Image from 'next/image';

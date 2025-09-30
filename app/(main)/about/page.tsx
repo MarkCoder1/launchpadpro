@@ -26,7 +26,7 @@ export default function About() {
 
                     <div>
                         <h2 className="text-xl font-medium text-gray-900 mb-4">
-                            What You'll Find Here
+                            What You&apos;ll Find Here
                         </h2>
                         <p className="text-gray-600 leading-relaxed mb-4">
                             Powerful tools designed to accelerate your career journey:

@@ -47,7 +47,7 @@ const Page = () => {
                         Thank you for your interest in getting in touch!
                     </span>
 
-                    <span className='font-bold max-w-96'>I value open communication and welcome any inquiries, feedback, or collaboration opportunities. Please don't hesitate to get in touch with me by filling out the contact form, especially if you find any errors!</span>
+                    <span className='font-bold max-w-96'>I value open communication and welcome any inquiries, feedback, or collaboration opportunities. Please don&apos;t hesitate to get in touch with me by filling out the contact form, especially if you find any errors!</span>
                 </div>
                 {/* image */}
                 <form action="https://formsubmit.co/marcalber59@gmail.com" method='POST' className="space-y-4 mt-24">
