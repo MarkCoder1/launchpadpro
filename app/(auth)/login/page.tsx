@@ -68,8 +68,8 @@ export default function LoginPage() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (err) {
-      setFormError("Something went wrong. Please try again.");
+    } catch (error) {
+      setFormError(`Something went wrong. Please try again. ${error.message}`);
     } finally {
       setLoading(false);
     }
