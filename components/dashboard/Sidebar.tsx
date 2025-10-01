@@ -3,6 +3,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import Image from 'next/image';
+import { isAdmin } from '../../lib/admin';
 import {
   Home,
   Search,
@@ -10,16 +11,17 @@ import {
   User,
   LogOut,
   Briefcase,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 
-const sidebarItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'career-explorer', label: 'Career Explorer', icon: Search },
-  { id: 'cv-builder', label: 'CV Builder', icon: FileText },
-  { id: 'opportunities', label: 'Opportunities', icon: Briefcase },
-  { id: 'profile', label: 'Profile', icon: User },
-];
+interface SidebarItem {
+  id: string;
+  label: string;
+  icon: any;
+  isExternal?: boolean;
+  href?: string;
+}
 
 interface SidebarProps {
   isMobileOpen?: boolean;
@@ -31,12 +33,47 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
   const { data: session } = useSession();
   const [activeItem, setActiveItem] = useState('dashboard');
 
+  // Get sidebar items based on user permissions
+  const getSidebarItems = (): SidebarItem[] => {
+    const baseItems: SidebarItem[] = [
+      { id: 'dashboard', label: 'Dashboard', icon: Home },
+      { id: 'career-explorer', label: 'Career Explorer', icon: Search },
+      { id: 'cv-builder', label: 'CV Builder', icon: FileText },
+      { id: 'opportunities', label: 'Opportunities', icon: Briefcase },
+      { id: 'profile', label: 'Profile', icon: User },
+    ];
+
+    // Add admin panel for admin users only
+    if (session?.user?.email && isAdmin(session.user.email)) {
+      baseItems.push({
+        id: 'admin',
+        label: 'Admin Panel',
+        icon: Settings,
+        isExternal: true,
+        href: '/admin/users'
+      });
+    }
+
+    return baseItems;
+  };
+
+  const sidebarItems = getSidebarItems();
+
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push('/');
   };
 
-  const handleItemSelect = (itemId: string) => {
+  const handleItemSelect = (itemId: string, item: SidebarItem) => {
+    // Handle external links
+    if (item.isExternal && item.href) {
+      router.push(item.href);
+      if (onMobileToggle) {
+        onMobileToggle();
+      }
+      return;
+    }
+    
     setActiveItem(itemId);
     // Dispatch custom event to communicate with dashboard page
     window.dispatchEvent(new CustomEvent('sidebar-item-select', { detail: itemId }));
@@ -84,7 +121,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
               return (
                 <li key={item.id}>
                   <button
-                    onClick={() => handleItemSelect(item.id)}
+                    onClick={() => handleItemSelect(item.id, item)}
                     className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${isActive
                         ? 'bg-primary/80 text-primary-foreground shadow-sm'
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -154,7 +191,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
                   return (
                     <li key={item.id}>
                       <button
-                        onClick={() => handleItemSelect(item.id)}
+                        onClick={() => handleItemSelect(item.id, item)}
                         className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${isActive
                             ? 'bg-primary/80 text-primary-foreground shadow-sm'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'

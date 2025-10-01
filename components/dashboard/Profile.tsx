@@ -5,13 +5,22 @@ import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import EditProfileModal from "./EditProfileModal"
 import DeleteAccountModal from "./DeleteAccountModal"
+import SkillsModal from "./SkillsModal"
+import EducationModal from "./EducationModal"
+import ExperienceModal from "./ExperienceModal"
 
 export default function Profile() {
   const { data: session, update } = useSession()
   const [userData, setUserData] = useState(null)
+  const [skills, setSkills] = useState([])
+  const [education, setEducation] = useState([])
+  const [experience, setExperience] = useState([])
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false)
+  const [isEducationModalOpen, setIsEducationModalOpen] = useState(false)
+  const [isExperienceModalOpen, setIsExperienceModalOpen] = useState(false)
 
   // Fetch fresh user data from database
   const fetchUserData = async () => {
@@ -35,9 +44,57 @@ export default function Profile() {
     }
   }
 
+  const fetchUserSkills = async () => {
+    try {
+      const response = await fetch('/api/user/skills');
+      if (response.ok) {
+        const data = await response.json();
+        setSkills(data.skills);
+        console.log('Fetched skills:', data.skills);
+      } else {
+        console.error('Failed to fetch user skills');
+      }
+    } catch (error) {
+      console.error('Error fetching user skills:', error);
+    }
+  };
+
+  const fetchUserEducation = async () => {
+    try {
+      const response = await fetch('/api/user/education');
+      if (response.ok) {
+        const data = await response.json();
+        setEducation(data.education);
+        console.log('Fetched education:', data.education);
+      } else {
+        console.error('Failed to fetch user education');
+      }
+    } catch (error) {
+      console.error('Error fetching user education:', error);
+    }
+  };
+
+  const fetchUserExperience = async () => {
+    try {
+      const response = await fetch('/api/user/experience');
+      if (response.ok) {
+        const data = await response.json();
+        setExperience(data.experience);
+        console.log('Fetched experience:', data.experience);
+      } else {
+        console.error('Failed to fetch user experience');
+      }
+    } catch (error) {
+      console.error('Error fetching user experience:', error);
+    }
+  };
+
   useEffect(() => {
     if (session) {
       fetchUserData()
+      fetchUserSkills()
+      fetchUserEducation()
+      fetchUserExperience()
     }
   }, [session])
 
@@ -140,7 +197,7 @@ export default function Profile() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Skills & Interests
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setIsSkillsModalOpen(true)}>
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
@@ -151,33 +208,42 @@ export default function Profile() {
             <div>
               <h4 className="font-medium mb-2">Technical Skills</h4>
               <div className="flex gap-2 flex-wrap">
-                {['JavaScript', 'React', 'Node.js', 'Python', 'SQL'].map((skill) => (
-                  <span key={skill} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                    {skill}
+                {skills.filter(skill => skill.type === 'technical').map((skill) => (
+                  <span key={skill.id} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                    {skill.name}
                   </span>
                 ))}
+                {skills.filter(skill => skill.type === 'technical').length === 0 && (
+                  <span className="text-muted-foreground text-sm">No technical skills added yet</span>
+                )}
               </div>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Soft Skills</h4>
               <div className="flex gap-2 flex-wrap">
-                {['Communication', 'Leadership', 'Problem Solving', 'Teamwork'].map((skill) => (
-                  <span key={skill} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
-                    {skill}
+                {skills.filter(skill => skill.type === 'soft').map((skill) => (
+                  <span key={skill.id} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
+                    {skill.name}
                   </span>
                 ))}
+                {skills.filter(skill => skill.type === 'soft').length === 0 && (
+                  <span className="text-muted-foreground text-sm">No soft skills added yet</span>
+                )}
               </div>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Interests</h4>
               <div className="flex gap-2 flex-wrap">
-                {['Web Development', 'AI/ML', 'Data Science', 'Startups'].map((interest) => (
-                  <span key={interest} className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
-                    {interest}
+                {skills.filter(skill => skill.type === 'interests').map((skill) => (
+                  <span key={skill.id} className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm">
+                    {skill.name}
                   </span>
                 ))}
+                {skills.filter(skill => skill.type === 'interests').length === 0 && (
+                  <span className="text-muted-foreground text-sm">No interests added yet</span>
+                )}
               </div>
             </div>
           </div>
@@ -190,7 +256,7 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-base sm:text-lg">
               Education
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setIsEducationModalOpen(true)}>
                 <Edit className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Edit</span>
               </Button>
@@ -198,11 +264,29 @@ export default function Profile() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="border-l-2 border-primary pl-4">
-                <h4 className="font-semibold text-sm sm:text-base">Bachelor of Computer Science</h4>
-                <p className="text-muted-foreground text-sm">University of Technology</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">2020 - 2024</p>
-              </div>
+              {education.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p className="text-sm">No education entries added yet</p>
+                  <p className="text-xs mt-1">Click Edit to add your educational background</p>
+                </div>
+              ) : (
+                education.map((edu) => (
+                  <div key={edu.id} className="border-l-2 border-primary pl-4">
+                    <h4 className="font-semibold text-sm sm:text-base">{edu.degree}</h4>
+                    <p className="text-muted-foreground text-sm">{edu.institution}</p>
+                    {edu.fieldOfStudy && (
+                      <p className="text-muted-foreground text-xs">{edu.fieldOfStudy}</p>
+                    )}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {new Date(edu.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })} - {' '}
+                      {edu.isCurrently ? 'Present' : edu.endDate ? new Date(edu.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'Not specified'}
+                    </p>
+                    {edu.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{edu.description}</p>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -211,7 +295,7 @@ export default function Profile() {
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-base sm:text-lg">
               Experience
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setIsExperienceModalOpen(true)}>
                 <Edit className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Edit</span>
               </Button>
@@ -219,11 +303,29 @@ export default function Profile() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="border-l-2 border-primary pl-4">
-                <h4 className="font-semibold text-sm sm:text-base">Software Engineering Intern</h4>
-                <p className="text-muted-foreground text-sm">TechCorp Inc.</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">Summer 2023</p>
-              </div>
+              {experience.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p className="text-sm">No experience entries added yet</p>
+                  <p className="text-xs mt-1">Click Edit to add your work experience</p>
+                </div>
+              ) : (
+                experience.map((exp) => (
+                  <div key={exp.id} className="border-l-2 border-primary pl-4">
+                    <h4 className="font-semibold text-sm sm:text-base">{exp.position}</h4>
+                    <p className="text-muted-foreground text-sm">{exp.company}</p>
+                    {exp.location && (
+                      <p className="text-muted-foreground text-xs">{exp.location}</p>
+                    )}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {new Date(exp.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })} - {' '}
+                      {exp.isCurrently ? 'Present' : exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : 'Not specified'}
+                    </p>
+                    {exp.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{exp.description}</p>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
@@ -272,6 +374,30 @@ export default function Profile() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         userEmail={displayData?.email}
+      />
+
+      {/* Skills Modal */}
+      <SkillsModal
+        isOpen={isSkillsModalOpen}
+        onClose={() => setIsSkillsModalOpen(false)}
+        skills={skills}
+        onSkillsUpdate={fetchUserSkills}
+      />
+
+      {/* Education Modal */}
+      <EducationModal
+        isOpen={isEducationModalOpen}
+        onClose={() => setIsEducationModalOpen(false)}
+        education={education}
+        onEducationUpdate={fetchUserEducation}
+      />
+
+      {/* Experience Modal */}
+      <ExperienceModal
+        isOpen={isExperienceModalOpen}
+        onClose={() => setIsExperienceModalOpen(false)}
+        experience={experience}
+        onExperienceUpdate={fetchUserExperience}
       />
     </div>
   )
