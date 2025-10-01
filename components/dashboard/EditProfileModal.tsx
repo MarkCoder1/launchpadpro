@@ -21,7 +21,7 @@ interface EditProfileModalProps {
     phone?: string | null
     location?: string | null
   }
-  onSuccess: (updatedUser: any) => void
+  onSuccess: (updatedUser: {name: string | null, email: string | null, phone: string | null, location: string | null}) => void
 }
 
 export default function EditProfileModal({ 
@@ -122,7 +122,7 @@ export default function EditProfileModal({
 
       onSuccess(data.user)
       onClose()
-    } catch (error: any) {
+    } catch (error) {
       setErrors(prev => ({ 
         ...prev, 
         general: error.message || 'Failed to update profile' 

@@ -86,7 +86,7 @@ export default function RegisterPage() {
       })
 
       router.push("/dashboard")
-    } catch (err: any) {
+    } catch (err) {
       setFormError(err.message)
     } finally {
       setLoading(false)

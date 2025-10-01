@@ -41,7 +41,7 @@ export default function Profile() {
     }
   }, [session])
 
-  const handleEditSuccess = async (updatedUser: any) => {
+  const handleEditSuccess = async (updatedUser) => {
     // Update local state
     setUserData(updatedUser)
     

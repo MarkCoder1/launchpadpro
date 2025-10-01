@@ -8,10 +8,8 @@ import {
   Search,
   FileText,
   User,
-  Settings,
   LogOut,
   Briefcase,
-  Menu,
   X
 } from 'lucide-react';
 
@@ -55,7 +53,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
     };
 
     window.addEventListener('active-component-change', handleActiveComponentChange as EventListener);
-    
+
     return () => {
       window.removeEventListener('active-component-change', handleActiveComponentChange as EventListener);
     };
@@ -68,8 +66,8 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
         {/* Header */}
         <div className="p-6 border-b border-border">
           <div className='flex items-center space-x-2'>
-              <h2 className="text-xl font-bold text-foreground">CareerPad</h2>
-              <Image src="/logo_icon.png" alt="Logo" width={40} height={40} className="h-10 w-10" />
+            <h2 className="text-xl font-bold text-foreground">CareerPad</h2>
+            <Image src="/logo_icon.png" alt="Logo" width={40} height={40} className="h-10 w-10" />
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Welcome, {session?.user?.name?.split(' ')[0] || 'User'}
@@ -82,16 +80,15 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeItem === item.id;
-              
+
               return (
                 <li key={item.id}>
                   <button
                     onClick={() => handleItemSelect(item.id)}
-                    className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-                      isActive 
-                        ? 'bg-primary/80 text-primary-foreground shadow-sm' 
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${isActive
+                        ? 'bg-primary/80 text-primary-foreground shadow-sm'
                         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                    }`}
+                      }`}
                   >
                     <Icon className="h-5 w-5 mr-3" />
                     {item.label}
@@ -119,11 +116,11 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
       {isMobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50" 
+          <div
+            className="fixed inset-0 bg-black/50"
             onClick={onMobileToggle}
           />
-          
+
           {/* Sidebar */}
           <div className="fixed left-0 top-0 h-full w-64 bg-card border-r border-border flex flex-col transform transition-transform duration-300 ease-in-out">
             {/* Header with close button */}
@@ -153,16 +150,15 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
                 {sidebarItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeItem === item.id;
-                  
+
                   return (
                     <li key={item.id}>
                       <button
                         onClick={() => handleItemSelect(item.id)}
-                        className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-                          isActive 
-                            ? 'bg-primary/80 text-primary-foreground shadow-sm' 
+                        className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${isActive
+                            ? 'bg-primary/80 text-primary-foreground shadow-sm'
                             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                        }`}
+                          }`}
                       >
                         <Icon className="h-5 w-5 mr-3" />
                         {item.label}

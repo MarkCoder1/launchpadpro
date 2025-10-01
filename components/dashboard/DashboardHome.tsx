@@ -8,7 +8,7 @@ export default function DashboardHome() {
       {/* Welcome Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold">Dashboard Overview</h1>
-        <p className="text-muted-foreground mt-2 text-sm sm:text-base">Here's what's happening with your career journey today.</p>
+        <p className="text-muted-foreground mt-2 text-sm sm:text-base">Here&apos;s what&apos;s happening with your career journey today.</p>
       </div>
 
       {/* Stats Cards */}

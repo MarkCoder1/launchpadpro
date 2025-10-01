@@ -69,7 +69,7 @@ export default function DeleteAccountModal({
             // Account deleted successfully - sign out and redirect
             await signOut({ redirect: false })
             router.push('/')
-        } catch (error: any) {
+        } catch (error) {
             setError(error.message || 'Failed to delete account')
         } finally {
             setLoading(false)

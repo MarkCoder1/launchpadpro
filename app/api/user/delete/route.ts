@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import { auth } from "../../../auth"
-import bcrypt from "bcrypt"
 
 const prisma = new PrismaClient()
 
 // DELETE - Delete user account
-export async function DELETE(req: Request) {
+export async function DELETE() {
   try {
     const session = await auth()
     
