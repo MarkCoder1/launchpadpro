@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     const allJobs = Array.isArray(data) ? data : [];
     
     // Filter for internship-related positions
-    const internshipJobs = allJobs.filter((job: any) => 
+    const internshipJobs = allJobs.filter((job) => 
       job.title && (
         job.title.toLowerCase().includes('intern') ||
         job.title.toLowerCase().includes('graduate') ||
@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
     const clientSideLimit = Math.min(parseInt(searchParams.get('limit') || '20'), 30);
     const paginatedInternships = internshipJobs.slice(0, clientSideLimit);
 
-    const internships = paginatedInternships.map((job: any, index: number) => {
+    const internships = paginatedInternships.map((job, index: number) => {
       // Create unique ID using job ID, page, and index to prevent duplicates
       const uniqueId = job.id ? `internship-${job.id}-p${page}-${index}` : `internship-${Date.now()}-p${page}-${index}`;
       // Extract skills/tags from description

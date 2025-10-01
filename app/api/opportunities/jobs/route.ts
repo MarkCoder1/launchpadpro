@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     const endIndex = clientSideLimit;
     const paginatedJobs = jobsArray.slice(startIndex, endIndex);
     
-    const jobs = paginatedJobs.map((job: any, index: number) => {
+    const jobs = paginatedJobs.map((job, index: number) => {
       // Create unique ID using job ID, page, and index to prevent duplicates
       const uniqueId = job.id ? `job-${job.id}-p${page}-${index}` : `job-${Date.now()}-p${page}-${index}`;
       

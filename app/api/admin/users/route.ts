@@ -120,7 +120,7 @@ export async function PUT(req: NextRequest) {
       .reduce((obj, key) => {
         obj[key] = updateData[key];
         return obj;
-      }, {} as any);
+      }, {} as Record<string, any>);
 
     // Check if email is being updated and ensure it's unique
     if (filteredData.email) {

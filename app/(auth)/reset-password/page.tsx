@@ -27,7 +27,7 @@ export default function ResetPasswordPage() {
 
   const [errors, setErrors] = useState({ password: "", confirmPassword: "" })
   const [error, setError] = useState("")
-  
+
   const [success, setSuccess] = useState(false)
 
   // Verify token on component mount
@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/login")
       }, 3000)
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Something went wrong. Please try again.")
     } finally {
       setLoading(false)

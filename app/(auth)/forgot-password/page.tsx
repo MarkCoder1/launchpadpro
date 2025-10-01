@@ -48,7 +48,7 @@ export default function ForgotPasswordPage() {
       }
 
       setSuccess(true)
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message || "Something went wrong. Please try again.")
     } finally {
       setLoading(false)

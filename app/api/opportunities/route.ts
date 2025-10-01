@@ -21,10 +21,10 @@ interface RapidAPIJob {
   locations_derived?: string[];
   cities_derived?: string[];
   remote_derived?: boolean;
-  salary_raw?: any;
+  salary_raw?: string ;
   description_text?: string;
   url?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | string[] | undefined;
 }
 
 interface VolunteerOpportunity {

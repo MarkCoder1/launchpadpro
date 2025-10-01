@@ -18,7 +18,7 @@ import {
 interface SidebarItem {
   id: string;
   label: string;
-  icon: any;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   isExternal?: boolean;
   href?: string;
 }
