@@ -105,7 +105,7 @@ export default function HomePage() {
         <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8">
           CareerPad helps you explore careers, craft a winning CV, and never miss an opportunity.
         </p>
-        <Button size="lg" className="w-full sm:w-auto">Join Free Today</Button>
+        <Link href="/register"><Button size="lg" className="w-full sm:w-auto">Join Free Today</Button></Link>
       </section>
     </main>
   );

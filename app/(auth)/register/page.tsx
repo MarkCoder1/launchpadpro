@@ -94,14 +94,20 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 bg-gradient-to-bl from-careerpad-primary/50 to-careerpad-secondary/50">
-      <Link
-        href="/"
-        className="absolute top-4 left-4 text-md text-black-foreground hover:underline"
-      >
-        &larr; Back to Home
-      </Link>
-      <Card className="w-full max-w-md sm:max-w-lg md:max-w-xl shadow-lg rounded-2xl mx-2 sm:mx-0">
+    <main className="min-h-screen bg-background bg-gradient-to-bl from-careerpad-primary/50 to-careerpad-secondary/50">
+      {/* Back button - responsive positioning */}
+      <div className="w-full px-4 sm:px-6 pt-4 pb-2 sm:pt-6 sm:pb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm sm:text-md text-black-foreground hover:underline transition-colors"
+        >
+          &larr; Back to Home
+        </Link>
+      </div>
+      
+      {/* Centered card container */}
+      <div className="flex items-center justify-center px-4 sm:px-6 pb-6 sm:pb-8" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+        <Card className="w-full max-w-md sm:max-w-lg md:max-w-xl shadow-lg rounded-2xl">
         <CardContent className="p-4 sm:p-8">
           <h1 className="text-xl sm:text-2xl font-bold text-center mb-2">
             Create Your Account
@@ -212,6 +218,7 @@ export default function RegisterPage() {
           </p>
         </CardContent>
       </Card>
+      </div>
     </main>
   )
 }

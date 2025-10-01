@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import Image from 'next/image';
 import {
   Home,
@@ -33,7 +33,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileToggle }: Sideba
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
-    router.push('/login');
+    router.push('/');
   };
 
   const handleItemSelect = (itemId: string) => {
