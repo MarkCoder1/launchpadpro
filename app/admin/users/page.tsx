@@ -8,15 +8,12 @@ import {
   Search, 
   Edit2, 
   Trash2, 
-  UserPlus, 
   ChevronLeft, 
   ChevronRight, 
-  MoreHorizontal,
   User,
   Mail,
   Calendar,
-  Shield
-} from 'lucide-react';
+  } from 'lucide-react';
 
 interface User {
   id: string;

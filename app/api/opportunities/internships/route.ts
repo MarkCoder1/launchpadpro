@@ -7,7 +7,6 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get('query') || '';
     const location = searchParams.get('location') || '';
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100); // Default 20, max 100
     const remote = searchParams.get('remote'); // true, false, or null
     const company = searchParams.get('company') || '';
     const dateFilter = searchParams.get('dateFilter') || '';

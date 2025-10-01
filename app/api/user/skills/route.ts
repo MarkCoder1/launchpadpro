@@ -7,7 +7,7 @@ const prisma = globalThis.prisma || new PrismaClient();
 if (process.env.NODE_ENV !== "production") globalThis.prisma = prisma;
 
 // GET /api/user/skills - Fetch user skills
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Check authentication
     const session = await auth();

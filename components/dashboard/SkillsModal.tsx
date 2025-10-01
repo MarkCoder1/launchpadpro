@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { X, Plus, Trash2, Loader2 } from 'lucide-react';
+import { X, Plus, Loader2 } from 'lucide-react';
 
 interface Skill {
   id: string;

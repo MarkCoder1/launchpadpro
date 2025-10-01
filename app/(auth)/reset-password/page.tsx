@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
         setError(data.error || "Invalid or expired reset token")
       }
     } catch (err) {
-      setError("Failed to verify reset token")
+      setError(`Failed to verify reset token: ${err.message}`)
     } finally {
       setVerifyingToken(false)
     }
@@ -186,7 +186,7 @@ export default function ResetPasswordPage() {
               
               <h1 className="text-xl font-bold mb-2">Password Reset Successful!</h1>
               <p className="text-muted-foreground mb-6">
-                Your password has been successfully reset. You'll be redirected to the login page in a moment.
+                Your password has been successfully reset. You&apos;ll be redirected to the login page in a moment.
               </p>
               
               <Link href="/login">
