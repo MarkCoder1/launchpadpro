@@ -67,13 +67,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    let raw: string = (response as any).text ?? "";
+    let raw: string = (response).text ?? "";
     raw = raw
       .replace(/^\s*```(?:json)?\s*/i, "")
       .replace(/\s*```\s*$/i, "")
       .trim();
 
-    let parsed: any;
+    let parsed;
     try {
       parsed = JSON.parse(raw);
     } catch {

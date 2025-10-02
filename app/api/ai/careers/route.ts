@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     });
 
     // response.text is what the docs example uses; handle whatever form we get
-    let raw: string = (response as any).text ?? String(response);
+    let raw: string = (response).text ?? String(response);
 
     // ensure string
     if (typeof raw !== "string") raw = String(raw);
@@ -108,10 +108,11 @@ export async function POST(req: NextRequest) {
       .trim();
 
     // Try parse, fallback to jsonrepair
-    let parsed: any;
+    let parsed;
     try {
       parsed = JSON.parse(raw);
     } catch (err) {
+      console.error("Failed to parse JSON from AI. raw response:", raw, err);
       try {
         const repaired = jsonrepair(raw);
         parsed = JSON.parse(repaired);
@@ -140,7 +141,7 @@ export async function POST(req: NextRequest) {
       );
     if (genericQuery) {
       const industries = new Set(
-        parsed.map((c: any) =>
+        parsed.map((c) =>
           String(c.industry || "")
             .split("/")[0]
             .trim()

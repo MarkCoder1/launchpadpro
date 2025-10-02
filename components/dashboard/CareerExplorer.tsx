@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
-import { Search, Star, Bookmark, Loader2, TrendingUp, DollarSign, ExternalLink, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, Loader2, TrendingUp, DollarSign, ExternalLink, ChevronDown, ChevronUp } from "lucide-react"
 import CareerDetailsModal from "./CareerDetailsModal"
 
 interface Career {
