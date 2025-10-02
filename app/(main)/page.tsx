@@ -59,7 +59,7 @@ export default function HomePage() {
               <Search className="h-8 w-8 sm:h-10 sm:w-10 text-primary mb-3 sm:mb-4" />
               <h3 className="font-semibold text-base sm:text-lg">Opportunities Feed</h3>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
-                Find scholarships, internships, and competitions. Filter by
+                Find volunteers, internships, and jobs. Filter by
                 deadline, region, or field, and save opportunities with reminders.
               </p>
             </CardContent>
@@ -89,7 +89,7 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold text-lg sm:text-xl mb-1 sm:mb-2">3. Find Opportunities</h3>
               <p className="text-xs sm:text-base text-muted-foreground">
-                Browse the feed of scholarships, internships, and competitions.
+                Browse the feed of jobs, internships, and volunteership.
                 Save, filter, and get deadline reminders.
               </p>
             </div>

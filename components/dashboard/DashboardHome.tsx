@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
 import { ArrowRight, TrendingUp, Users, Award } from "lucide-react"
+import Link from "next/link"
 
 export default function DashboardHome() {
   return (
@@ -55,10 +56,12 @@ export default function DashboardHome() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm sm:text-base">Discover careers that match your skills and interests.</p>
-            <Button className="w-full text-sm sm:text-base">
-              Explore Careers
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href={{ pathname: "/dashboard", query: { component: "career-explorer" } }} scroll={false} replace={false}>
+              <Button className="w-full text-sm sm:text-base">
+                Explore Careers
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -68,10 +71,12 @@ export default function DashboardHome() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm sm:text-base">Create professional resumes tailored to your field.</p>
-            <Button variant="outline" className="w-full text-sm sm:text-base">
-              Build CV
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href={{ pathname: "/dashboard", query: { component: "cv-builder" } }} scroll={false} replace={false}>
+              <Button variant="outline" className="w-full text-sm sm:text-base">
+                Build CV
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -80,11 +85,13 @@ export default function DashboardHome() {
             <CardTitle className="text-base sm:text-lg">Opportunity Feed</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm sm:text-base">Browse internships, scholarships, and jobs.</p>
-            <Button variant="outline" className="w-full text-sm sm:text-base">
-              View Opportunities
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <p className="text-muted-foreground text-sm sm:text-base">Browse internships, volunteer opportunities, and jobs.</p>
+            <Link href={{ pathname: "/dashboard", query: { component: "opportunities" } }} scroll={false} replace={false}>
+              <Button variant="outline" className="w-full text-sm sm:text-base">
+                View Opportunities
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -94,10 +101,12 @@ export default function DashboardHome() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm sm:text-base">Complete your profile to get better recommendations.</p>
-            <Button variant="outline" className="w-full text-sm sm:text-base">
-              Update Profile
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href={{ pathname: "/dashboard", query: { component: "profile" } }} scroll={false} replace={false}>
+              <Button variant="outline" className="w-full text-sm sm:text-base">
+                Update Profile
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

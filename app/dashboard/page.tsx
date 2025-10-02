@@ -1,16 +1,17 @@
 'use client'
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import DashboardHome from "../../components/dashboard/DashboardHome"
 import CareerExplorer from "../../components/dashboard/CareerExplorer"
 import CVBuilder from "../../components/dashboard/CVBuilder"
 import Opportunities from "../../components/dashboard/Opportunities"
 import Profile from "../../components/dashboard/Profile"
 
-export default function DashboardPage() {
+function DashboardContent() {
     const { data: session, status } = useSession()
     const router = useRouter()
+    const searchParams = useSearchParams()
     
     // Get active component from URL params or default to dashboard
     const [activeComponent, setActiveComponent] = useState(() => {
@@ -26,6 +27,12 @@ export default function DashboardPage() {
             router.push("/login")
         }
     }, [status, router])
+
+    // Listen for URL parameter changes
+    useEffect(() => {
+        const component = searchParams.get('component') || 'dashboard';
+        setActiveComponent(component);
+    }, [searchParams]);
 
     // Listen for sidebar events via custom event
     useEffect(() => {
@@ -76,5 +83,17 @@ export default function DashboardPage() {
         <div className="h-full">
             {renderActiveComponent()}
         </div>
+    )
+}
+
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center h-full">
+                <div className="text-lg">Loading...</div>
+            </div>
+        }>
+            <DashboardContent />
+        </Suspense>
     )
 }

@@ -3,6 +3,7 @@ import { Button } from '../ui/button';
 import { Menu, User } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface MobileNavProps {
   onMenuToggle: () => void;
@@ -32,7 +33,9 @@ export default function MobileNav({ onMenuToggle }: MobileNavProps) {
       {/* Right side - User info */}
       <div className="flex items-center space-x-2">
         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-          <User className="h-4 w-4 text-primary" />
+          <Link href={{ pathname: "/dashboard", query: { component: "profile" } }} scroll={false} replace={false}>
+            <User className="h-4 w-4 text-primary" />
+          </Link>
         </div>
         <span className="text-sm font-medium text-foreground hidden sm:block">
           {session?.user?.name?.split(' ')[0] || 'User'}

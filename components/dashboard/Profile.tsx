@@ -50,7 +50,6 @@ export default function Profile() {
       if (response.ok) {
         const data = await response.json();
         setSkills(data.skills);
-        console.log('Fetched skills:', data.skills);
       } else {
         console.error('Failed to fetch user skills');
       }
@@ -65,7 +64,6 @@ export default function Profile() {
       if (response.ok) {
         const data = await response.json();
         setEducation(data.education);
-        console.log('Fetched education:', data.education);
       } else {
         console.error('Failed to fetch user education');
       }
@@ -80,7 +78,6 @@ export default function Profile() {
       if (response.ok) {
         const data = await response.json();
         setExperience(data.experience);
-        console.log('Fetched experience:', data.experience);
       } else {
         console.error('Failed to fetch user experience');
       }

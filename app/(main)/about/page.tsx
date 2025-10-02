@@ -33,7 +33,7 @@ export default function About() {
                         </p>
                         <div className="space-y-3 text-gray-600">
                             <p><strong>AI Career Explorer</strong> — Discover careers that match your interests and skills</p>
-                            <p><strong>Opportunity Feed</strong> — Browse internships, scholarships, and jobs updated daily</p>
+                            <p><strong>Opportunity Feed</strong> — Browse internships, volunteer opportunities, and jobs updated daily</p>
                             <p><strong>AI CV Builder</strong> — Create professional resumes tailored to your field</p>
                             <p><strong>And more</strong>...</p>
                         </div>

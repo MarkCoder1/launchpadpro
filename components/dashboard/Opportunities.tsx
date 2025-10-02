@@ -1,9 +1,9 @@
 'use client'
-
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
 import { Briefcase, MapPin, Clock, ExternalLink, Search, Loader2, Home, Users } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 
 interface Opportunity {
   id: string
@@ -21,20 +21,27 @@ interface Opportunity {
 }
 
 export default function Opportunities() {
+  const searchParams = useSearchParams()
+  
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [filters, setFilters] = useState({
-    query: '',
-    location: '',
-    type: 'all' as 'all' | 'jobs' | 'internships' | 'volunteers',
-    remote: '' as '' | 'true' | 'false',
-    company: '',
-    excludeCompany: '',
-    description: '',
-    source: ''
+  
+  // Initialize filters from URL parameters
+  const [filters, setFilters] = useState(() => {
+    return {
+      query: searchParams.get('search') || '',
+      location: searchParams.get('location') || '',
+      type: (searchParams.get('type') as 'all' | 'jobs' | 'internships' | 'volunteers') || 'all',
+      remote: (searchParams.get('remote') as '' | 'true' | 'false') || '',
+      company: searchParams.get('company') || '',
+      excludeCompany: searchParams.get('excludeCompany') || '',
+      description: searchParams.get('description') || '',
+      source: searchParams.get('source') || ''
+    }
   })
+  
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -109,6 +116,27 @@ export default function Opportunities() {
   useEffect(() => {
     fetchOpportunities(true)
   }, [])
+
+  // Listen for URL parameter changes
+  useEffect(() => {
+    const newFilters = {
+      query: searchParams.get('search') || '',
+      location: searchParams.get('location') || '',
+      type: (searchParams.get('type') as 'all' | 'jobs' | 'internships' | 'volunteers') || 'all',
+      remote: (searchParams.get('remote') as '' | 'true' | 'false') || '',
+      company: searchParams.get('company') || '',
+      excludeCompany: searchParams.get('excludeCompany') || '',
+      description: searchParams.get('description') || '',
+      source: searchParams.get('source') || ''
+    }
+    
+    setFilters(newFilters)
+    
+    // If there are search parameters, trigger a search
+    if (searchParams.has('search') || searchParams.has('type')) {
+      fetchOpportunities(true)
+    }
+  }, [searchParams])
 
   // Handle filter changes
   const handleFilterChange = (key: string, value: string) => {
