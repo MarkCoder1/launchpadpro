@@ -1,43 +1,81 @@
-// NOTE: This is a simplified, conceptual example. 
-// You must replace <YOUR_ACCESS_TOKEN> with your actual, valid OAuth token.
-
-const UPWORK_API_BASE_URL = 'https://api.upwork.com/api/v3/';
-const ACCESS_TOKEN = '<YOUR_ACCESS_TOKEN>'; // Get this via the OAuth process
-
-async function searchUpworkJobs(query) {
-    // The search endpoint and parameters might vary based on Upwork's latest documentation.
-    const endpoint = `${UPWORK_API_BASE_URL}offers/v1/jobs/search?q=${encodeURIComponent(query)}`;
-    
-    try {
-        const response = await fetch(endpoint, {
-            method: 'GET',
-            headers: {
-                // The Authorization header is essential and contains your token.
-                'Authorization': `Bearer ${ACCESS_TOKEN}`,
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            // Handle errors like 401 Unauthorized (bad token) or 404 Not Found.
-            throw new Error(`HTTP error! status: ${response.status}`);
+const userData = {
+    "personalInfo": {
+        "firstName": "marc",
+        "lastName": "alber",
+        "email": "marcalber59@gmail.com",
+        "phone": "2222559566",
+        "location": "kj nmjnm",
+        "title": "dd",
+        "summary": "",
+        "linkedin": "",
+        "website": ""
+    },
+    "education": [
+        {
+            "institution": "Univeristy of Technology",
+            "degree": "Bachelor of Computer Science",
+            "field": "wef",
+            "startDate": "2025-09",
+            "endDate": "",
+            "gpa": "",
+            "description": ""
         }
-
-        const data = await response.json();
-        
-        console.log(`Found ${data.paging.total} job postings for "${query}":\n`);
-        
-        // Loop through and print details of the first 5 jobs
-        data.jobs.slice(0, 5).forEach((job, index) => {
-            console.log(`--- Job ${index + 1} ---`);
-            console.log(`Title: ${job.title}`);
-            console.log(`Budget: ${job.budget ? `$${job.budget}` : 'N/A'}`);
-            console.log(`URL: ${job.url}`);
-        });
-
-    } catch (error) {
-        console.error('Failed to fetch job postings:', error.message);
-    }
+    ],
+    "workExperience": [
+        {
+            "company": "jhkl",
+            "position": ".,",
+            "startDate": "999",
+            "endDate": "1000",
+            "description": "sds",
+            "location": "99",
+            "current": false
+        }
+    ],
+    "skills": [
+        {
+            "name": "",
+            "level": "",
+            "category": ""
+        }
+    ],
+    "projects": [],
+    "achievements": [],
+    "generatedAt": "2025-11-09T20:56:03.200Z"
 }
+async function analyzeImage() {
+  try {
+    // Prefer an environment variable for the API key. Do not commit keys to source.
+    const apiKey = process.env.HF_API_KEY || "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";
+    const response = await fetch("https://router.huggingface.co/hf-inference/mistralai/Mixtral-8x7B", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      method: "POST",
+      body: JSON.stringify({
+        inputs: `Write a professional resume using this data: ${JSON.stringify(userData)}`,
+      }),
+    });
 
-searchUpworkJobs('Node.js developer');
+    console.log("statusCode:", response.status);
+    const ct = response.headers.get("content-type") || "";
+    console.log("content-type:", ct);
+
+    // If the response isn't JSON, print a truncated text body to help diagnose (e.g. HTML error page).
+    const bodyText = await response.text();
+    if (!ct.includes("application/json")) {
+      console.error("Non-JSON response (first 2000 chars):\n", bodyText.slice(0, 2000));
+      return;
+    }
+
+    // Parse JSON only when content-type indicates JSON
+    const result = JSON.parse(bodyText);
+    // The shape of the response might vary by model/endpoint. Log it for debugging.
+    console.log("response json:", result);
+    const aiText = Array.isArray(result) && result[0] && result[0].generated_text ? result[0].generated_text : (result.generated_text || JSON.stringify(result));
+    console.log("aiText (first 1000 chars):\n", aiText && aiText.toString().slice(0, 1000));
+    return aiText;
+  } catch (err) {
+    console.error("request failed:", err);
+  }
+}
+// Example usage
+analyzeImage();

@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
 import { ArrowRight, TrendingUp, Users, Award } from "lucide-react"
-import Link from "next/link"
 
 export default function DashboardHome() {
   return (
@@ -55,13 +54,17 @@ export default function DashboardHome() {
             <CardTitle className="text-base sm:text-lg">Career Explorer</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm sm:text-base">Discover careers that match your skills and interests.</p>
-            <Link href={{ pathname: "/dashboard", query: { component: "career-explorer" } }} scroll={false} replace={false}>
-              <Button className="w-full text-sm sm:text-base">
-                Explore Careers
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <p className="text-muted-foreground text-sm sm:text-base mb-2">Discover careers that match your skills and interests.</p>
+            <Button
+              className="w-full text-sm sm:text-base"
+              onClick={() => {
+                // full page reload with query params (use location.replace(...) if you don't want a history entry)
+                window.location.assign("/dashboard?component=career-explorer")
+              }}
+            >
+              Explore Careers
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
 
@@ -70,13 +73,18 @@ export default function DashboardHome() {
             <CardTitle className="text-base sm:text-lg">CV Builder</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm sm:text-base">Create professional resumes tailored to your field.</p>
-            <Link href={{ pathname: "/dashboard", query: { component: "cv-builder" } }} scroll={false} replace={false}>
-              <Button variant="outline" className="w-full text-sm sm:text-base">
-                Build CV
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <p className="text-muted-foreground text-sm sm:text-base mb-3">Create professional resumes tailored to your field.</p>
+            <Button
+              variant="outline"
+              className="w-full text-sm sm:text-base"
+              onClick={() => {
+                // full page reload with query params
+                window.location.assign("/dashboard?component=cv-builder")
+              }}
+            >
+              Build CV
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
 
@@ -85,13 +93,18 @@ export default function DashboardHome() {
             <CardTitle className="text-base sm:text-lg">Opportunity Feed</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm sm:text-base">Browse internships, volunteer opportunities, and jobs.</p>
-            <Link href={{ pathname: "/dashboard", query: { component: "opportunities" } }} scroll={false} replace={false}>
-              <Button variant="outline" className="w-full text-sm sm:text-base">
-                View Opportunities
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <p className="text-muted-foreground text-sm sm:text-base mb-3">Browse internships, volunteer opportunities, and jobs.</p>
+            <Button
+              variant="outline"
+              className="w-full text-sm sm:text-base"
+              onClick={() => {
+                // full page reload with query params
+                window.location.assign("/dashboard?component=opportunities")
+              }}
+            >
+              View Opportunities
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
 
@@ -100,13 +113,18 @@ export default function DashboardHome() {
             <CardTitle className="text-base sm:text-lg">Profile Setup</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm sm:text-base">Complete your profile to get better recommendations.</p>
-            <Link href={{ pathname: "/dashboard", query: { component: "profile" } }} scroll={false} replace={false}>
-              <Button variant="outline" className="w-full text-sm sm:text-base">
-                Update Profile
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <p className="text-muted-foreground text-sm sm:text-base mb-3">Complete your profile to get better recommendations.</p>
+            <Button
+              variant="outline"
+              className="w-full text-sm sm:text-base"
+              onClick={() => {
+                // full page reload with query params
+                window.location.assign("/dashboard?component=profile")
+              }}
+            >
+              Update Profile
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
       </div>

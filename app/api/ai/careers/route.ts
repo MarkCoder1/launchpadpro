@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     });
 
     // response.text is what the docs example uses; handle whatever form we get
-    let raw: string = (response).text ?? String(response);
+    let raw: string = response.text ?? String(response);
 
     // ensure string
     if (typeof raw !== "string") raw = String(raw);

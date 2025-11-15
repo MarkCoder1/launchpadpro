@@ -1,0 +1,64 @@
+{
+    "personalInfo": {
+        "firstName": "Mark",
+        "lastName": "Adam",
+        "email": "marcalber59@gmail.com",
+        "phone": "18325280302",
+        "location": "Dallas, TX",
+        "title": "Marketing Manager",
+        "summary": "Boom Ta5 7abib 2lby",
+        "linkedin": "https://www.linkedin.com/in/mark-alber1/",
+        "website": "https://mark-alber.vercel.app/"
+    },
+    "education": [
+        {
+            "institution": "Univeristy of Technology",
+            "degree": "Bachelor of Computer Science",
+            "field": "Computer Science",
+            "startDate": "2025-09",
+            "endDate": "2026-02",
+            "gpa": "",
+            "description": ""
+        }
+    ],
+    "workExperience": [
+        {
+            "company": "Google",
+            "position": "Software Engineer",
+            "startDate": "2020-01",
+            "endDate": "2025-02",
+            "description": "worked and made 120 thousand lines of code and made the website faster by 10-20 percent and won the honor of the best software developer on the region",
+            "location": "Dallas, TX",
+            "current": false
+        }
+    ],
+    "skills": [
+        {
+            "name": "React",
+            "level": "Advanced",
+            "category": "Frameworks & Libraries"
+        },
+        {
+            "name": "Leadership",
+            "level": "Intermediate",
+            "category": "Soft Skills"
+        },
+        {
+            "name": "Python",
+            "level": "Expert",
+            "category": "Programming Languages"
+        }
+    ],
+    "projects": [
+        {
+            "name": "Mobile App",
+            "description": "Made the UI and the frontend and backend made 12+ features made the api faster by 15 percent and published iton app store",
+            "technologies": "React, Node.js, i18n, Flutter",
+            "url": "",
+            "startDate": "",
+            "endDate": ""
+        }
+    ],
+    "achievements": [],
+    "generatedAt": "2025-11-09T23:26:58.323Z"
+}
