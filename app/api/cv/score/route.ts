@@ -46,7 +46,7 @@ async function pdfBufferToImages(buf: Buffer): Promise<string[]> {
               render: (args: { canvasContext: CanvasRenderingContext2D, viewport: { width: number; height: number } }) => { promise: Promise<void> }
             }>
           }> },
-          GlobalWorkerOptions: { workerSrc: string }
+          GlobalWorkerOptions: { workerSrc: strin g }
         } }).pdfjsLib
         pdfjsLib.GlobalWorkerOptions.workerSrc = (window as unknown as { __PDFJS_WORKER__: string }).__PDFJS_WORKER__
         const uint8 = new Uint8Array(pdfBytes)
