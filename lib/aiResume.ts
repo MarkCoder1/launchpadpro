@@ -121,7 +121,6 @@ async function polishWithHuggingFace(data: ResumeData, options: AIOptions): Prom
     model: options.model || process.env.HF_MODEL || process.env.HUGGINGFACE_MODEL_ID,
     provider: 'huggingface',
     polishedAt: new Date().toISOString(),
-    errors: errors.length ? errors : undefined,
   }
   return polished
 }

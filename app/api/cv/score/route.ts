@@ -37,18 +37,10 @@ async function pdfBufferToImages(buf: Buffer): Promise<string[]> {
       await page.addScriptTag({ content: `window.__PDFJS_WORKER__ = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfJsVersion}/build/pdf.worker.min.js'` })
 
       const dataUrls: string[] = await page.evaluate(async ({ pdfBytes }) => {
-        // pdf.js non-module build attaches to window
-        const pdfjsLib = (window as unknown as { pdfjsLib: {
-          getDocument: (opts: { data: Uint8Array }) => { promise: Promise<{
-            numPages: number,
-            getPage: (n: number) => Promise<{
-              getViewport: (o: { scale: number }) => { width: number; height: number },
-              render: (args: { canvasContext: CanvasRenderingContext2D, viewport: { width: number; height: number } }) => { promise: Promise<void> }
-            }>
-          }> },
-          GlobalWorkerOptions: { workerSrc: strin g }
-        } }).pdfjsLib
-        pdfjsLib.GlobalWorkerOptions.workerSrc = (window as unknown as { __PDFJS_WORKER__: string }).__PDFJS_WORKER__
+        // @ts-ignore - provided by non-module build
+        const pdfjsLib = (window as any).pdfjsLib
+        // @ts-ignore
+        pdfjsLib.GlobalWorkerOptions.workerSrc = (window as any).__PDFJS_WORKER__
         const uint8 = new Uint8Array(pdfBytes)
         const loadingTask = pdfjsLib.getDocument({ data: uint8 })
         const pdf = await loadingTask.promise
@@ -58,16 +50,16 @@ async function pdfBufferToImages(buf: Buffer): Promise<string[]> {
           const p = await pdf.getPage(i)
           const viewport = p.getViewport({ scale })
           const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+          const ctx = canvas.getContext('2d')!
           canvas.width = viewport.width
           canvas.height = viewport.height
-          await p.render({ canvasContext: ctx, viewport }).promise
+          await p.render({ canvasContext: ctx as any, viewport }).promise
           out.push(canvas.toDataURL('image/png'))
         }
         return out
       }, { pdfBytes: Array.from(buf.values()) })
       if (dataUrls.length) return dataUrls
-    } catch {
+    } catch (err) {
       // Fallback to Chrome built-in PDF viewer screenshot
       // Render the PDF via an <embed> tag and take a fullPage screenshot
       const dataUrl = `data:application/pdf;base64,${buf.toString('base64')}`
@@ -152,8 +144,7 @@ async function scoreResumeWithGroqVision(params: {
 
   const system = `You are an expert resume reviewer. Analyze the provided resume IMAGES (not text) and the job description. Return ONLY a single JSON object that strictly matches this TypeScript schema keys and structure (values should be consistent): {"total":number,"weights":{"keywordMatch":25,"structureFormatting":15,"grammarClarity":15,"experienceRelevance":20,"designLayout":25},"inputType":"pdf"|"docx"|"text","fileName":string?|undefined,"extractedText":string,"sections":{"experience":boolean,"education":boolean,"skills":boolean,"projects":boolean,"achievements":boolean,"certifications":boolean,"contact":boolean},"keywords":{"extractedKeywords":string[],"present":string[],"missing":string[],"coveragePercent":number},"readability":{"fleschKincaidGrade":number|null,"colemanLiauIndex":number|null,"readingEase":number|null,"avgSentenceLength":number|null,"complexSentenceRatio":number|null},"design":{"fontVariety":number,"bulletUsage":number,"hasConsistentHeaders":boolean,"excessiveWhitespace":boolean,"alignmentSignals":"good"|"mixed"|"poor"},"categories":{"keywordMatch":{"score":number,"reasons":string[],"suggestions":string[]},"structureFormatting":{"score":number,"reasons":string[],"suggestions":string[]},"grammarClarity":{"score":number,"reasons":string[],"suggestions":string[],"issues"?:Array<{"type":"spelling"|"grammar"|"clarity"|"style","message":string,"example"?:string,"suggestion"?:string}>},"experienceRelevance":{"score":number,"reasons":string[],"suggestions":string[]},"designLayout":{"score":number,"reasons":string[],"suggestions":string[]}},"meta":{"createdAt":string,"aiProviders":{"grammar":"none"|"groq"|"openai"|"huggingface"|"none","vision":"groq"|"none"},"processingMs":number,"debug":{"extractedTextSample"?:string,"lineFeaturesSample"?:any[],"tokensSample"?:string[]}}}`
 
-  type ContentPart = { type: 'text', text: string } | { type: 'image_url', image_url: { url: string } }
-  const userTextParts: ContentPart[] = [
+  const userTextParts: any[] = [
     { type: 'text', text: `Job description:\n${jobDescription}\n\nUser skills: ${(userSkills||[]).join(', ')}` },
   ]
   // Append images
@@ -171,8 +162,7 @@ async function scoreResumeWithGroqVision(params: {
   const candidateModels = [envModel, 'meta-llama/llama-4-scout-17b-16e-instruct']
   const tried: string[] = []
   let lastErrText = ''
-  type GroqResponse = { choices?: Array<{ message?: { content?: string } }> }
-  let json: GroqResponse | null = null
+  let json: any = null
   for (const model of candidateModels) {
     tried.push(model)
     console.debug('[CVScore] Groq request model:', model, 'images:', images.length)
@@ -279,7 +269,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<CVScoreApiRes
       }
       const report = await scoreResumeWithGroqVision({ images, jobDescription: jd, userSkills, inputType, fileName })
       // Set processing metrics
-      report.meta = report.meta || { createdAt: new Date().toISOString() }
+      report.meta = report.meta || ({} as any)
       report.meta.processingMs = Date.now() - t0
       report.meta.aiProviders = { ...(report.meta.aiProviders || {}), vision: 'groq' }
       return NextResponse.json({ ok: true, report }, { status: 200 })
@@ -300,7 +290,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<CVScoreApiRes
         await browser.close()
       }
       const report = await scoreResumeWithGroqVision({ images, jobDescription: jd, userSkills, inputType })
-      report.meta = report.meta || { createdAt: new Date().toISOString() }
+      report.meta = report.meta || ({} as any)
       report.meta.processingMs = Date.now() - t0
       report.meta.aiProviders = { ...(report.meta.aiProviders || {}), vision: 'groq' }
       return NextResponse.json({ ok: true, report }, { status: 200 })
