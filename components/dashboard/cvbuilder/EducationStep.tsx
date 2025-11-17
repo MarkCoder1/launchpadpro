@@ -39,7 +39,16 @@ const EducationStep: React.FC<EducationStepProps> = ({
           const data = await response.json();
           if (data.education && data.education.length > 0) {
             // Map API data to component format
-            const mappedEducation = data.education.map((edu: any) => ({
+            type ApiEdu = {
+              institution?: string
+              degree?: string
+              fieldOfStudy?: string
+              startDate?: string | Date
+              endDate?: string | Date
+              isCurrently?: boolean
+              description?: string
+            }
+            const mappedEducation = (data.education as ApiEdu[]).map((edu) => ({
               institution: edu.institution || '',
               degree: edu.degree || '',
               field: edu.fieldOfStudy || '', // API uses 'fieldOfStudy'

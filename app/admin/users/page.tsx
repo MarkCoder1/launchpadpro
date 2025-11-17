@@ -73,11 +73,11 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetchUsers(currentPage, searchTerm);
-  }, [currentPage]);
+  }, [currentPage, searchTerm]);
 
   const handleSearch = () => {
+    // Reset to first page; effect will fetch using current searchTerm
     setCurrentPage(1);
-    fetchUsers(1, searchTerm);
   };
 
   const handleEdit = (user: User) => {

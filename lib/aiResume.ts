@@ -174,36 +174,45 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
   const polished: PolishedResume & GroqExtras = { ...data }
   // If we parsed a JSON object, merge data back
   if (parsed && typeof parsed === 'object') {
-    if (parsed.personalInfo?.summary) {
-      polished.personalInfo = { ...polished.personalInfo, summary: sanitizeSummary(parsed.personalInfo.summary) }
+    type Parsed = {
+      personalInfo?: { summary?: unknown }
+      workExperience?: Array<{ bullets?: unknown; description?: unknown }>
+      education?: Array<{ bullets?: unknown; description?: unknown }>
+      skills?: unknown
+      projects?: unknown
+      achievements?: unknown
+    }
+    const pParsed = parsed as Parsed
+    if (pParsed.personalInfo?.summary) {
+      polished.personalInfo = { ...polished.personalInfo, summary: sanitizeSummary(String(pParsed.personalInfo.summary)) }
     } else {
       // Try to salvage a plain summary from the cleaned content
       const fallback = extractSummaryFromText(unfenced)
       if (fallback) polished.personalInfo.summary = sanitizeSummary(fallback)
     }
     // Merge experience bullets if present
-    if (typeof parsed === 'object' && parsed && Array.isArray((parsed as any).workExperience)) {
-      const srcWE = (parsed as any).workExperience as Array<any>
+    if (Array.isArray(pParsed.workExperience)) {
+      const srcWE = pParsed.workExperience
       polished.workExperience = (polished.workExperience || []).map((w, i: number) => {
         const src = srcWE[i]
-        if (src?.bullets && Array.isArray(src.bullets)) return { ...w, bullets: src.bullets }
-        if (Array.isArray(src?.description)) return { ...w, bullets: src.description }
+        if (src?.bullets && Array.isArray(src.bullets)) return { ...w, bullets: src.bullets as string[] }
+        if (Array.isArray(src?.description)) return { ...w, bullets: src.description as string[] }
         return w
       })
     }
     // Merge education bullets
-    if (typeof parsed === 'object' && parsed && Array.isArray((parsed as any).education)) {
-      const srcED = (parsed as any).education as Array<any>
+    if (Array.isArray(pParsed.education)) {
+      const srcED = pParsed.education
       polished.education = (polished.education || []).map((e, i: number) => {
         const src = srcED[i]
-        if (src?.bullets && Array.isArray(src.bullets)) return { ...e, bullets: src.bullets }
-        if (Array.isArray(src?.description)) return { ...e, bullets: src.description }
+        if (src?.bullets && Array.isArray(src.bullets)) return { ...e, bullets: src.bullets as string[] }
+        if (Array.isArray(src?.description)) return { ...e, bullets: src.description as string[] }
         return e
       })
     }
     // If skills were returned as a string line, capture it; else build from array in input
-    if (typeof parsed.skills === 'string') {
-      polished.skillsLine = parsed.skills
+    if (typeof pParsed.skills === 'string') {
+      polished.skillsLine = pParsed.skills
     }
     if (!polished.skillsLine) {
       const arr = Array.isArray(data.skills) ? data.skills : []
@@ -211,11 +220,8 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
       if (names.length) polished.skillsLine = names.join(', ')
     }
     // Optional projects/achievements
-    if (typeof parsed === 'object' && parsed) {
-      const p = parsed as { projects?: unknown; achievements?: unknown }
-      if (Array.isArray(p.projects)) polished.projectsPolished = p.projects
-      if (Array.isArray(p.achievements)) polished.achievementsPolished = p.achievements
-    }
+    if (Array.isArray(pParsed.projects)) polished.projectsPolished = pParsed.projects
+    if (Array.isArray(pParsed.achievements)) polished.achievementsPolished = pParsed.achievements
   } else {
     // Could not parse JSON; salvage summary and build minimum viable polish
     const fallback = extractSummaryFromText(unfenced) || unfenced
