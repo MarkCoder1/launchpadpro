@@ -44,7 +44,7 @@ try {
     )
 
     // 1) AI polish - choose provider-specific model correctly
-    const aiProvider = (process.env.AI_PROVIDER as any) || 'huggingface'
+    const aiProvider = (process.env.AI_PROVIDER as string | undefined) || 'huggingface'
     let aiModel: string | undefined
     if (aiProvider === 'huggingface') {
         aiModel = process.env.HF_MODEL || process.env.HUGGINGFACE_MODEL_ID || process.env.HF_MODEL_ID
@@ -119,13 +119,14 @@ try {
             'X-Pdf-Duration': String(t6 - t5),
         },
     })
-} catch (err: any) {
+} catch (err: unknown) {
     const url = new URL(req.url)
     console.error('[generate-resume] error:', err)
     // Only include stack in response when debug flag is set
     const debugMode = url.searchParams.get('debug') === 'true'
-    const payload: any = { error: err?.message || 'Failed to generate resume' }
-    if (debugMode && err?.stack) payload.stack = err.stack.split('\n').slice(0, 10)
+    const message = err instanceof Error ? err.message : 'Failed to generate resume'
+    const payload: { error: string; stack?: string[] } = { error: message }
+    if (debugMode && err instanceof Error && err.stack) payload.stack = err.stack.split('\n').slice(0, 10)
     return NextResponse.json(payload, { status: 500 })
 }
 }

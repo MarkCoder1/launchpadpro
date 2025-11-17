@@ -5,8 +5,8 @@ import { jsonrepair } from 'jsonrepair'
 
 // Simple section prompts to improve each set of fields.
 // We keep prompts short to reduce token usage for free tiers.
-const SECTION_PROMPTS: Record<string, (data: any) => string> = {
-  summary: (d) => `Rewrite this resume professional summary in a concise, energetic style (<= 60 words). If empty, propose one based on title, skills, and experience context. Output plain text only. Data: ${JSON.stringify({title: d.personalInfo?.title, skills: d.skills, experience: d.workExperience?.map((w:any)=>({position:w.position, company:w.company}))})}`,
+const SECTION_PROMPTS: Record<'summary'|'skills'|'achievements'|'projects', (data: ResumeData) => string> = {
+  summary: (d) => `Rewrite this resume professional summary in a concise, energetic style (<= 60 words). If empty, propose one based on title, skills, and experience context. Output plain text only. Data: ${JSON.stringify({title: d.personalInfo?.title, skills: d.skills, experience: d.workExperience?.map((w)=>({position:w.position, company:w.company}))})}`,
   skills: (d) => `From the provided skills, return a single comma-separated line of the most relevant skills (<= 25 items). Output plain text only. Data: ${JSON.stringify(d.skills)}`,
   achievements: (d) => `Polish achievements into concise resume bullets (max 5). Output JSON array of strings. Data: ${JSON.stringify(d.achievements)}`,
   projects: (d) => `Summarize projects with impact, stack, and role. Output JSON array of strings. Data: ${JSON.stringify(d.projects)}`,
@@ -18,7 +18,7 @@ interface AIOptions {
 }
 
 // Attempts to parse JSON; if fails returns trimmed text.
-function safeJSONParse<T=any>(text: string): T | string {
+function safeJSONParse<T = unknown>(text: string): T | string {
   try { return JSON.parse(text) } catch { return text.trim() }
 }
 
@@ -50,19 +50,24 @@ async function callHF(prompt: string, model?: string): Promise<string> {
   })
   // API returns { generated_text }
   // Some models echo prompt – remove prompt prefix if present
-  const out = (res as any).generated_text || ''
+  const out = (res as unknown as { generated_text?: string }).generated_text || ''
   const cleaned = out.startsWith(prompt) ? out.slice(prompt.length) : out
   return cleaned.trim()
 }
 
 async function polishWithHuggingFace(data: ResumeData, options: AIOptions): Promise<PolishedResume> {
   const errors: string[] = []
-  const polished: any = { ...data }
+  type PolishedExtras = {
+    skillsLine?: string
+    achievementsPolished?: unknown
+    projectsPolished?: unknown
+  }
+  const polished: PolishedResume & PolishedExtras = { ...data }
   // Summary
   try {
     const raw = await callHF(SECTION_PROMPTS.summary(data), options.model)
     if (raw) polished.personalInfo.summary = raw
-  } catch (e:any) { errors.push(`summary: ${e?.message || e}`) }
+  } catch (e: unknown) { errors.push(`summary: ${e instanceof Error ? e.message : String(e)}`) }
   // Experience bullets (per item)
   try {
     const exps = await Promise.all((data.workExperience || []).map(async (w) => {
@@ -71,13 +76,13 @@ async function polishWithHuggingFace(data: ResumeData, options: AIOptions): Prom
         const raw = await callHF(prompt, options.model)
         const bullets = safeJSONParse<string[] | string>(raw)
         return { ...w, bullets }
-      } catch (e:any) {
-        errors.push(`experience(${w.company || w.position || ''}): ${e?.message || e}`)
+      } catch (e: unknown) {
+        errors.push(`experience(${w.company || w.position || ''}): ${e instanceof Error ? e.message : String(e)}`)
         return { ...w }
       }
     }))
     polished.workExperience = exps
-  } catch (e:any) { errors.push(`experience: ${e?.message || e}`) }
+  } catch (e: unknown) { errors.push(`experience: ${e instanceof Error ? e.message : String(e)}`) }
   // Education bullets (per item)
   try {
     const eds = await Promise.all((data.education || []).map(async (ed) => {
@@ -86,32 +91,32 @@ async function polishWithHuggingFace(data: ResumeData, options: AIOptions): Prom
         const raw = await callHF(prompt, options.model)
         const bullets = safeJSONParse<string[] | string>(raw)
         return { ...ed, bullets }
-      } catch (e:any) {
-        errors.push(`education(${ed.institution || ''}): ${e?.message || e}`)
+      } catch (e: unknown) {
+        errors.push(`education(${ed.institution || ''}): ${e instanceof Error ? e.message : String(e)}`)
         return { ...ed }
       }
     }))
     polished.education = eds
-  } catch (e:any) { errors.push(`education: ${e?.message || e}`) }
+  } catch (e: unknown) { errors.push(`education: ${e instanceof Error ? e.message : String(e)}`) }
   // Skills line
   try {
     const raw = await callHF(SECTION_PROMPTS.skills(data), options.model)
     polished.skillsLine = raw
-  } catch (e:any) { errors.push(`skills: ${e?.message || e}`) }
+  } catch (e: unknown) { errors.push(`skills: ${e instanceof Error ? e.message : String(e)}`) }
   // Achievements
   try {
     if (data.achievements?.length) {
       const raw = await callHF(SECTION_PROMPTS.achievements(data), options.model)
       polished.achievementsPolished = safeJSONParse(raw)
     }
-  } catch (e:any) { errors.push(`achievements: ${e?.message || e}`) }
+  } catch (e: unknown) { errors.push(`achievements: ${e instanceof Error ? e.message : String(e)}`) }
   // Projects
   try {
     if (data.projects?.length) {
       const raw = await callHF(SECTION_PROMPTS.projects(data), options.model)
       polished.projectsPolished = safeJSONParse(raw)
     }
-  } catch (e:any) { errors.push(`projects: ${e?.message || e}`) }
+  } catch (e: unknown) { errors.push(`projects: ${e instanceof Error ? e.message : String(e)}`) }
   polished.meta = {
     model: options.model || process.env.HF_MODEL || process.env.HUGGINGFACE_MODEL_ID,
     provider: 'huggingface',
@@ -155,11 +160,18 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
   // Sanitize possible markdown fences or preambles
   const unfenced = stripCodeFences(content).trim()
   const jsonText = extractJSONObjectText(unfenced)
-  let parsed: any | null = null
+  let parsed: unknown | null = null
   if (jsonText) {
     try { parsed = JSON.parse(jsonrepair(jsonText)) } catch { parsed = null }
   }
-  const polished: any = { ...data }
+  type GroqExtras = {
+    skillsLine?: string
+    achievementsPolished?: unknown
+    projectsPolished?: unknown
+    workExperience?: Array<ResumeData['workExperience'][number] & { bullets?: string[] }>
+    education?: Array<ResumeData['education'][number] & { bullets?: string[] }>
+  }
+  const polished: PolishedResume & GroqExtras = { ...data }
   // If we parsed a JSON object, merge data back
   if (parsed && typeof parsed === 'object') {
     if (parsed.personalInfo?.summary) {
@@ -170,18 +182,20 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
       if (fallback) polished.personalInfo.summary = sanitizeSummary(fallback)
     }
     // Merge experience bullets if present
-    if (Array.isArray(parsed.workExperience)) {
-      polished.workExperience = (polished.workExperience || []).map((w: any, i: number) => {
-        const src = parsed.workExperience[i]
+    if (typeof parsed === 'object' && parsed && Array.isArray((parsed as any).workExperience)) {
+      const srcWE = (parsed as any).workExperience as Array<any>
+      polished.workExperience = (polished.workExperience || []).map((w, i: number) => {
+        const src = srcWE[i]
         if (src?.bullets && Array.isArray(src.bullets)) return { ...w, bullets: src.bullets }
         if (Array.isArray(src?.description)) return { ...w, bullets: src.description }
         return w
       })
     }
     // Merge education bullets
-    if (Array.isArray(parsed.education)) {
-      polished.education = (polished.education || []).map((e: any, i: number) => {
-        const src = parsed.education[i]
+    if (typeof parsed === 'object' && parsed && Array.isArray((parsed as any).education)) {
+      const srcED = (parsed as any).education as Array<any>
+      polished.education = (polished.education || []).map((e, i: number) => {
+        const src = srcED[i]
         if (src?.bullets && Array.isArray(src.bullets)) return { ...e, bullets: src.bullets }
         if (Array.isArray(src?.description)) return { ...e, bullets: src.description }
         return e
@@ -193,18 +207,21 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
     }
     if (!polished.skillsLine) {
       const arr = Array.isArray(data.skills) ? data.skills : []
-      const names = arr.map((s:any)=>s?.name).filter(Boolean)
+      const names = arr.map((s)=>s?.name).filter(Boolean)
       if (names.length) polished.skillsLine = names.join(', ')
     }
     // Optional projects/achievements
-    if (Array.isArray(parsed.projects)) polished.projectsPolished = parsed.projects
-    if (Array.isArray(parsed.achievements)) polished.achievementsPolished = parsed.achievements
+    if (typeof parsed === 'object' && parsed) {
+      const p = parsed as { projects?: unknown; achievements?: unknown }
+      if (Array.isArray(p.projects)) polished.projectsPolished = p.projects
+      if (Array.isArray(p.achievements)) polished.achievementsPolished = p.achievements
+    }
   } else {
     // Could not parse JSON; salvage summary and build minimum viable polish
     const fallback = extractSummaryFromText(unfenced) || unfenced
     polished.personalInfo.summary = sanitizeSummary(fallback)
     const arr = Array.isArray(data.skills) ? data.skills : []
-    const names = arr.map((s:any)=>s?.name).filter(Boolean)
+    const names = arr.map((s)=>s?.name).filter(Boolean)
     if (names.length) polished.skillsLine = names.join(', ')
   }
   const result: PolishedResume = {
@@ -220,7 +237,7 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
   // Generate bullets per experience using Groq to avoid generic descriptions
   try {
     if (Array.isArray(result.workExperience)) {
-      const updated = [] as any[]
+      const updated: Array<ResumeData['workExperience'][number] & { bullets?: string[] }> = []
       for (const w of result.workExperience) {
         try {
           const bullets = await groqExperienceBullets(w, apiKey, model)
@@ -236,7 +253,7 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
   // Generate concise bullets for education entries
   try {
     if (Array.isArray(result.education)) {
-      const updated = [] as any[]
+      const updated: Array<ResumeData['education'][number] & { bullets?: string[] }> = []
       for (const e of result.education) {
         try {
           const bullets = await groqEducationBullets(e, apiKey, model)
@@ -251,8 +268,8 @@ async function polishWithGroq(data: ResumeData, options: AIOptions): Promise<Pol
 
   // Do not hallucinate achievements if user provided none
   if (!Array.isArray(data.achievements) || data.achievements.length === 0) {
-    if (Array.isArray((result as any).achievementsPolished) && (result as any).achievementsPolished.length > 0) {
-      delete (result as any).achievementsPolished
+    if (Array.isArray((result as unknown as { achievementsPolished?: unknown[] }).achievementsPolished) && (result as unknown as { achievementsPolished?: unknown[] }).achievementsPolished!.length > 0) {
+      delete (result as unknown as { achievementsPolished?: unknown[] }).achievementsPolished
     }
   }
   return result
@@ -320,7 +337,7 @@ async function groqGenerateSummary(data: ResumeData, apiKey: string, model: stri
     title: p?.title,
     providedSummary: p?.summary,
     keyExp: firstExp ? { position: firstExp.position, company: firstExp.company, description: firstExp.description } : null,
-    skills: (data.skills||[]).map((s:any)=>s?.name).filter(Boolean).slice(0,10)
+    skills: (data.skills||[]).map((s)=>s?.name).filter(Boolean).slice(0,10)
   })
   const text = await groqChat([
     { role: 'system', content: sys },
@@ -329,7 +346,7 @@ async function groqGenerateSummary(data: ResumeData, apiKey: string, model: stri
   return stripCodeFences(text).trim()
 }
 
-async function groqExperienceBullets(w: any, apiKey: string, model: string): Promise<string[]> {
+async function groqExperienceBullets(w: ResumeData['workExperience'][number], apiKey: string, model: string): Promise<string[]> {
   const sys = 'You create quantified, action-oriented resume bullets (3-5) strictly as a JSON array of strings. No markdown.'
   const usr = JSON.stringify(w)
   const text = await groqChat([
@@ -337,14 +354,14 @@ async function groqExperienceBullets(w: any, apiKey: string, model: string): Pro
     { role: 'user', content: `From this single experience, output bullets: ${usr}` }
   ], apiKey, model)
   const cleaned = stripCodeFences(text)
-  let arr: any
+  let arr: unknown
   try { arr = JSON.parse(jsonrepair(extractJSONObjectText(cleaned) || cleaned)) } catch { arr = null }
   if (Array.isArray(arr)) return arr.map(String)
   // fallback: split lines
   return cleaned.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,5)
 }
 
-async function groqEducationBullets(e: any, apiKey: string, model: string): Promise<string[]> {
+async function groqEducationBullets(e: ResumeData['education'][number], apiKey: string, model: string): Promise<string[]> {
   const sys = 'You produce 1-2 concise education bullets focusing on achievements or focus areas, JSON array only.'
   const usr = JSON.stringify(e)
   const text = await groqChat([
@@ -352,7 +369,7 @@ async function groqEducationBullets(e: any, apiKey: string, model: string): Prom
     { role: 'user', content: `From this education entry, output bullets: ${usr}` }
   ], apiKey, model)
   const cleaned = stripCodeFences(text)
-  let arr: any
+  let arr: unknown
   try { arr = JSON.parse(jsonrepair(extractJSONObjectText(cleaned) || cleaned)) } catch { arr = null }
   if (Array.isArray(arr)) return arr.map(String).slice(0,2)
   return cleaned.split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,2)

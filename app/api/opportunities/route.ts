@@ -32,8 +32,22 @@ interface TheirStackJob {
   };
   locations?: Array<{ display_name?: string }>;
   technology_slugs?: string[];
-  [key: string]: any;
 }
+
+type TheirStackSearchBody = {
+  page: number;
+  limit: number;
+  posted_at_max_age_days: number;
+  job_title_or?: string[];
+  job_title_pattern_or?: string[];
+  job_location_pattern_or?: string[];
+  remote?: boolean;
+  company_name_case_insensitive_or?: string[];
+  company_name_not?: string[];
+  job_description_contains_or?: string[];
+  url_domain_or?: string[];
+  employment_statuses_or?: string[];
+};
 
 interface VolunteerOpportunity {
   id: number;
@@ -113,7 +127,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Build TheirStack body (page is 0-based)
-    const body: any = {
+    const body: TheirStackSearchBody = {
       page: Math.max(0, filters.page - 1),
       limit: filters.limit,
       posted_at_max_age_days: 7,

@@ -1,5 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 
+interface TheirStackJob {
+  id?: number | string;
+  job_title?: string;
+  url?: string;
+  final_url?: string;
+  source_url?: string;
+  date_posted?: string;
+  remote?: boolean;
+  hybrid?: boolean;
+  salary_string?: string;
+  description?: string;
+  company_domain?: string;
+  company_object?: {
+    name?: string;
+    domain?: string;
+    linkedin_url?: string;
+  };
+  locations?: Array<{ display_name?: string }>;
+  technology_slugs?: string[];
+}
+
+type TheirStackSearchBody = {
+  page: number;
+  limit: number;
+  posted_at_max_age_days: number;
+  job_title_or?: string[];
+  job_location_pattern_or?: string[];
+  remote?: boolean;
+  company_name_case_insensitive_or?: string[];
+  job_description_contains_or?: string[];
+  url_domain_or?: string[];
+};
+
 // GET /api/opportunities/jobs - Fetch jobs from TheirStack
 export async function GET(req: NextRequest) {
   try {
@@ -22,7 +55,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Build TheirStack search body (page is 0-based)
-    const body: any = {
+    const body: TheirStackSearchBody = {
       page: Math.max(0, page - 1),
       limit,
       posted_at_max_age_days: 7,
@@ -57,11 +90,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const tsData: { data?: any[]; metadata?: { total_results?: number } } = await response.json();
-    const rows = Array.isArray(tsData?.data) ? tsData.data! : [];
+    const tsData: { data?: TheirStackJob[]; metadata?: { total_results?: number } } = await response.json();
+    const rows: TheirStackJob[] = Array.isArray(tsData?.data) ? tsData.data! : [];
     console.log('TheirStack jobs received:', rows.length);
 
-    const jobs = rows.map((job: any, index: number) => {
+    const jobs = rows.map((job: TheirStackJob, index: number) => {
       const uniqueId = `job-${job.id ?? `${Date.now()}-${index}`}-p${page}-${index}`;
       const workType = job.remote ? 'Remote' : (job.hybrid ? 'Hybrid' : 'On-site');
       const loc = job.remote ? 'Remote' : (job.locations?.[0]?.display_name || 'Not specified');

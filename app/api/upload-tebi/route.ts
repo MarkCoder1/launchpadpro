@@ -46,9 +46,9 @@ export async function POST(req: NextRequest) {
 
     const publicUrl = `${TEBI_ENDPOINT}/${TEBI_BUCKET}/${encodeURIComponent(fileName)}`
     return NextResponse.json({ url: publicUrl }, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[upload-tebi] Upload failed:', error)
-    const message = error?.message || 'Upload failed'
+    const message = error instanceof Error ? error.message : 'Upload failed'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

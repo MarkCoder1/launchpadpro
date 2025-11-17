@@ -1,4 +1,4 @@
-import type { PolishedResume, ResumeStyle } from '../types/resume'
+import type { PolishedResume, ResumeStyle, ResumeData } from '../types/resume'
 
 // Basic clean HTML template. Keep inline CSS for portability in headless Chrome.
 export function buildResumeHTML(data: PolishedResume, style: ResumeStyle = 'classic'): string {
@@ -23,12 +23,12 @@ function buildClassicHTML(data: PolishedResume): string {
   const p = data.personalInfo
   const fullName = `${capitalize(p.firstName)} ${capitalize(p.lastName)}`.trim()
   const contact = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean).join(' · ')
-  const skillsLine = (data as any).skillsLine as string | undefined
+  const skillsLine = (data as PolishedResume & { skillsLine?: string }).skillsLine
   const work = data.workExperience || []
   const education = data.education || []
-  const achievements = (data as any).achievementsPolished || data.achievements || []
-  const projects = (data as any).projectsPolished || data.projects || []
-  const skills = Array.isArray((data as any).skills) ? (data as any).skills : []
+  const achievements = (data as PolishedResume & { achievementsPolished?: Array<string | { title?: string; award?: string; year?: string; description?: string }> }).achievementsPolished || data.achievements || []
+  const projects = (data as PolishedResume & { projectsPolished?: Array<string | { name?: string; description?: string; technologies?: string[]; url?: string; achievements?: Array<string | { title?: string; description?: string }> }> }).projectsPolished || data.projects || []
+  const skills = Array.isArray(data.skills) ? data.skills : []
   const groupedSkills = groupSkillsByCategory(skills)
 
   return `<!doctype html>
@@ -76,7 +76,7 @@ function buildClassicHTML(data: PolishedResume): string {
     </section>` : ''}
 
     ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2>
-      <div class="section-content"><ul>${(achievements as any[]).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div>
+      <div class="section-content"><ul>${(achievements as Array<string | { title?: string; award?: string; year?: string; description?: string }>).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div>
     </section>` : ''}
 
     ${Array.isArray(projects) && projects.length ? `<section class="section"><h2>Projects</h2>
@@ -95,9 +95,9 @@ function buildModernHTML(data: PolishedResume): string {
   const links = [p.linkedin, p.website].filter(Boolean).join(' · ')
   const work = data.workExperience || []
   const education = data.education || []
-  const achievements = (data as any).achievementsPolished || data.achievements || []
-  const projects = (data as any).projectsPolished || data.projects || []
-  const skills = Array.isArray((data as any).skills) ? (data as any).skills : []
+  const achievements = (data as PolishedResume & { achievementsPolished?: Array<string | { title?: string; award?: string; year?: string; description?: string }> }).achievementsPolished || data.achievements || []
+  const projects = (data as PolishedResume & { projectsPolished?: Array<string | { name?: string; description?: string; technologies?: string[]; url?: string; achievements?: Array<string | { title?: string; description?: string }> }> }).projectsPolished || data.projects || []
+  const skills = Array.isArray(data.skills) ? data.skills : []
   const groupedSkills = groupSkillsByCategory(skills)
 
   return `<!doctype html>
@@ -144,7 +144,7 @@ function buildModernHTML(data: PolishedResume): string {
       <div class="right">
         ${education.length ? `<div class="card"><h2>Education</h2>${education.map(e => renderEducation(e)).join('<div style="height:6px"></div>')}</div>` : ''}
         ${renderSkillsCards(groupedSkills)}
-        ${Array.isArray(achievements) && achievements.length ? `<div class="card"><h2>Achievements</h2><ul>${(achievements as any[]).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div>` : ''}
+        ${Array.isArray(achievements) && achievements.length ? `<div class="card"><h2>Achievements</h2><ul>${(achievements as Array<string | { title?: string; award?: string; year?: string; description?: string }>).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div>` : ''}
       </div>
     </div>
   </body>
@@ -166,9 +166,9 @@ function buildMinimalHTML(data: PolishedResume): string {
   const contact = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean).join(' · ')
   const work = data.workExperience || []
   const education = data.education || []
-  const achievements = (data as any).achievementsPolished || data.achievements || []
-  const projects = (data as any).projectsPolished || data.projects || []
-  const skills = Array.isArray((data as any).skills) ? (data as any).skills : []
+  const achievements = (data as PolishedResume & { achievementsPolished?: Array<string | { title?: string; award?: string; year?: string; description?: string }> }).achievementsPolished || data.achievements || []
+  const projects = (data as PolishedResume & { projectsPolished?: Array<string | { name?: string; description?: string; technologies?: string[]; url?: string; achievements?: Array<string | { title?: string; description?: string }> }> }).projectsPolished || data.projects || []
+  const skills = Array.isArray(data.skills) ? data.skills : []
   const groupedSkills = groupSkillsByCategory(skills)
 
   return `<!doctype html>
@@ -202,7 +202,7 @@ function buildMinimalHTML(data: PolishedResume): string {
     ${renderSkillsSection(groupedSkills)}
     ${work.length ? `<section class="section"><h2>Experience</h2><div class="section-content">${work.map(w => renderExperience(w)).join('<div style="height:6px"></div>')}</div></section>` : ''}
     ${education.length ? `<section class="section"><h2>Education</h2><div class="section-content">${education.map(e => renderEducation(e)).join('<div style=\"height:6px\"></div>')}</div></section>` : ''}
-    ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2><div class="section-content"><ul>${(achievements as any[]).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div></section>` : ''}
+    ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2><div class="section-content"><ul>${(achievements as Array<string | { title?: string; award?: string; year?: string; description?: string }>).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div></section>` : ''}
     ${Array.isArray(projects) && projects.length ? `<section class="section"><h2>Projects</h2><div class="section-content">${projects.map(pr => renderProject(pr)).join('')}</div></section>` : ''}
   </body>
   </html>`
@@ -215,9 +215,9 @@ function buildElegantHTML(data: PolishedResume): string {
   const contact = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean).join(' · ')
   const work = data.workExperience || []
   const education = data.education || []
-  const achievements = (data as any).achievementsPolished || data.achievements || []
-  const projects = (data as any).projectsPolished || data.projects || []
-  const skills = Array.isArray((data as any).skills) ? (data as any).skills : []
+  const achievements = (data as PolishedResume & { achievementsPolished?: Array<string | { title?: string; award?: string; year?: string; description?: string }> }).achievementsPolished || data.achievements || []
+  const projects = (data as PolishedResume & { projectsPolished?: Array<string | { name?: string; description?: string; technologies?: string[]; url?: string; achievements?: Array<string | { title?: string; description?: string }> }> }).projectsPolished || data.projects || []
+  const skills = Array.isArray(data.skills) ? data.skills : []
   const groupedSkills = groupSkillsByCategory(skills)
   return `<!doctype html>
   <html><head><meta charset="utf-8" />
@@ -245,7 +245,7 @@ function buildElegantHTML(data: PolishedResume): string {
     ${renderSkillsSection(groupedSkills)}
     ${work.length ? `<section class="section"><h2>Experience</h2>${work.map(w => renderExperience(w)).join('<div style="height:5px"></div>')}</section>` : ''}
     ${education.length ? `<section class="section"><h2>Education</h2>${education.map(e => renderEducation(e)).join('<div style="height:5px"></div>')}</section>` : ''}
-    ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2><ul>${(achievements as any[]).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></section>` : ''}
+    ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2><ul>${(achievements as Array<string | { title?: string; award?: string; year?: string; description?: string }>).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></section>` : ''}
     ${Array.isArray(projects) && projects.length ? `<section class="section"><h2>Projects</h2>${projects.map(pr => renderProject(pr)).join('')}</section>` : ''}
   </body></html>`
 }
@@ -257,9 +257,9 @@ function buildCompactHTML(data: PolishedResume): string {
   const contact = [p.email, p.phone, p.location, p.linkedin, p.website].filter(Boolean).join(' · ')
   const work = data.workExperience || []
   const education = data.education || []
-  const achievements = (data as any).achievementsPolished || data.achievements || []
-  const projects = (data as any).projectsPolished || data.projects || []
-  const skills = Array.isArray((data as any).skills) ? (data as any).skills : []
+  const achievements = (data as PolishedResume & { achievementsPolished?: Array<string | { title?: string; award?: string; year?: string; description?: string }> }).achievementsPolished || data.achievements || []
+  const projects = (data as PolishedResume & { projectsPolished?: Array<string | { name?: string; description?: string; technologies?: string[]; url?: string; achievements?: Array<string | { title?: string; description?: string }> }> }).projectsPolished || data.projects || []
+  const skills = Array.isArray(data.skills) ? data.skills : []
   const groupedSkills = groupSkillsByCategory(skills)
   return `<!doctype html>
   <html><head><meta charset="utf-8" />
@@ -282,7 +282,7 @@ function buildCompactHTML(data: PolishedResume): string {
     ${renderSkillsSection(groupedSkills)}
     ${work.length ? `<section class="section"><h2>Experience</h2><div>${work.map(w => renderExperience(w)).join('<div style="height:3px"></div>')}</div></section>` : ''}
     ${education.length ? `<section class="section"><h2>Education</h2><div>${education.map(e => renderEducation(e)).join('<div style="height:3px"></div>')}</div></section>` : ''}
-    ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2><ul>${(achievements as any[]).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></section>` : ''}
+    ${Array.isArray(achievements) && achievements.length ? `<section class="section"><h2>Achievements</h2><ul>${(achievements as Array<string | { title?: string; award?: string; year?: string; description?: string }>).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></section>` : ''}
     ${Array.isArray(projects) && projects.length ? `<section class="section"><h2>Projects</h2><div>${projects.map(pr => renderProject(pr)).join('')}</div></section>` : ''}
   </body></html>`
 }
@@ -295,9 +295,9 @@ function buildCreativeHTML(data: PolishedResume): string {
   const links = [p.linkedin, p.website].filter(Boolean).join(' · ')
   const work = data.workExperience || []
   const education = data.education || []
-  const achievements = (data as any).achievementsPolished || data.achievements || []
-  const projects = (data as any).projectsPolished || data.projects || []
-  const skills = Array.isArray((data as any).skills) ? (data as any).skills : []
+  const achievements = (data as PolishedResume & { achievementsPolished?: Array<string | { title?: string; award?: string; year?: string; description?: string }> }).achievementsPolished || data.achievements || []
+  const projects = (data as PolishedResume & { projectsPolished?: Array<string | { name?: string; description?: string; technologies?: string[]; url?: string; achievements?: Array<string | { title?: string; description?: string }> }> }).projectsPolished || data.projects || []
+  const skills = Array.isArray(data.skills) ? data.skills : []
   const groupedSkills = groupSkillsByCategory(skills)
   return `<!doctype html>
   <html><head><meta charset="utf-8" />
@@ -322,25 +322,27 @@ function buildCreativeHTML(data: PolishedResume): string {
     ${renderSkillsSection(groupedSkills)}
     ${work.length ? `<div class="section"><h2>Experience</h2>${work.map(w => renderExperience(w)).join('<div style="height:6px"></div>')}</div>` : ''}
     ${education.length ? `<div class="section"><h2>Education</h2>${education.map(e => renderEducation(e)).join('<div style="height:6px"></div>')}</div>` : ''}
-    ${Array.isArray(achievements) && achievements.length ? `<div class="section"><h2>Achievements</h2><ul>${(achievements as any[]).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div>` : ''}
+    ${Array.isArray(achievements) && achievements.length ? `<div class="section"><h2>Achievements</h2><ul>${(achievements as Array<string | { title?: string; award?: string; year?: string; description?: string }>).map(a => typeof a === 'string' ? `<li>${escapeHtml(a)}</li>` : `<li>${escapeHtml(a.title || a.award || '')}${a.year ? ` (${escapeHtml(a.year)})` : ''}${a.description ? ` — ${escapeHtml(a.description)}` : ''}</li>`).join('')}</ul></div>` : ''}
     ${Array.isArray(projects) && projects.length ? `<div class="section"><h2>Projects</h2>${projects.map(pr => renderProject(pr)).join('')}</div>` : ''}
   </body></html>`
 }
 
-function renderExperience(w: any): string {
+type WorkItem = ResumeData['workExperience'][number] & { bullets?: Array<string | unknown> };
+function renderExperience(w: WorkItem): string {
   const title = [w.position, w.company].filter(Boolean).map(escapeHtml).join(' · ')
   const dates = [w.startDate, w.endDate || (w.current ? 'Present' : '')].filter(Boolean).join(' – ')
   const metaLine = [dates, w.location].filter(Boolean).map(escapeHtml).join(' · ')
   const rawBullets = Array.isArray(w.bullets) ? w.bullets : sentenceSplit(w.description)
-  const bullets = (rawBullets || []).map((b:any)=>String(b)).filter(Boolean)
+  const bullets = (rawBullets || []).map((b)=>String(b as string)).filter(Boolean)
   return `<div>
     <div class="exp-header">${title}</div>
     ${metaLine ? `<div class="meta line">${metaLine}</div>` : ''}
-    ${bullets.length ? `<ul>${bullets.map((b: any) => `<li>${escapeHtml(String(b))}</li>`).join('')}</ul>` : ''}
+    ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(String(b))}</li>`).join('')}</ul>` : ''}
   </div>`
 }
 
-function renderEducation(e: any): string {
+type EducationItem = ResumeData['education'][number] & { bullets?: Array<string | unknown> };
+function renderEducation(e: EducationItem): string {
   const title = `${escapeHtml(e.degree || '')}${e.field ? ' — ' + escapeHtml(e.field) : ''}`
   const dates = [e.startDate, e.endDate].filter(Boolean).join(' – ')
   const bullets = Array.isArray(e.bullets) ? e.bullets : sentenceSplit(e.description)
@@ -348,7 +350,7 @@ function renderEducation(e: any): string {
     <div><strong>${escapeHtml(e.institution || '')}</strong></div>
     ${title ? `<div class="muted line">${title}</div>` : ''}
     ${dates ? `<div class="meta line">${escapeHtml(dates)}</div>` : ''}
-    ${bullets && bullets.length ? `<ul>${bullets.map((b: any) => `<li>${escapeHtml(String(b))}</li>`).join('')}</ul>` : ''}
+    ${bullets && bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(String(b as string))}</li>`).join('')}</ul>` : ''}
   </div>`
 }
 
@@ -366,7 +368,7 @@ function capitalize(s?: string) {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-function groupSkillsByCategory(skills: any[]) {
+function groupSkillsByCategory(skills: ResumeData['skills']) {
   const map = new Map<string, { name: string, level?: string }[]>()
   for (const s of skills) {
     const cat = (s?.category || 'Other').toString()
@@ -392,11 +394,12 @@ function renderSkillsSection(groups: { category: string, items: { name: string, 
   return `<section class="section"><h2>Skills</h2><div class="section-content">${content}</div></section>`
 }
 
-function renderProject(p: any): string {
+type ProjectItem = string | (ResumeData['projects'][number] & { achievements?: Array<string | { title?: string; description?: string }>; url?: string });
+function renderProject(p: ProjectItem): string {
   if (!p) return ''
   if (typeof p === 'string') return `<div>• ${escapeHtml(p)}</div>`
   const name = p.name ? `<strong>${escapeHtml(p.name)}</strong>` : ''
-  const techs = p.technologies ? escapeHtml(p.technologies) : ''
+  const techs = p.technologies ? escapeHtml(Array.isArray(p.technologies) ? p.technologies.join(', ') : String(p.technologies)) : ''
   const link = p.url ? escapeHtml(p.url) : ''
   const headerParts = [name]
   if (techs) headerParts.push(techs)
@@ -405,7 +408,7 @@ function renderProject(p: any): string {
   // Split description into sentences and turn into bullet points
   const descBullets = sentenceSplit(p.description).map(d => d.trim()).filter(Boolean)
   // If achievements array exists, append those as additional bullets
-  const achBullets = Array.isArray(p.achievements) ? p.achievements.map((a:any)=> typeof a === 'string' ? a : (a.description || a.title || '')).filter(Boolean) : []
+  const achBullets = Array.isArray(p.achievements) ? p.achievements.map((a)=> typeof a === 'string' ? a : (a.description || a.title || '')).filter(Boolean) : []
   const allBullets = [...descBullets, ...achBullets]
   const bulletsHtml = allBullets.length ? `<ul>${allBullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>` : ''
   return `<div><div>${headerLine}</div>${bulletsHtml}</div>`

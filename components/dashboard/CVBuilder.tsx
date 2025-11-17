@@ -175,7 +175,7 @@ const CVBuilder: React.FC = () => {
     }
   ];
 
-  const updateValidation = (step: string, isValid: boolean, errors: any) => {
+  const updateValidation = (step: string, isValid: boolean, errors: ValidationError[] | { [index: number]: ValidationError[] }) => {
     setValidation(prev => ({
       ...prev,
       [step]: { isValid, errors }
@@ -400,9 +400,10 @@ const CVBuilder: React.FC = () => {
         } else {
           throw new Error('Unexpected response type from server');
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error('Generate CV error:', e);
-        setGenError(e?.message || 'Something went wrong generating your CV.');
+        const msg = e instanceof Error ? e.message : 'Something went wrong generating your CV.';
+        setGenError(msg);
       } finally {
         setIsGenerating(false);
       }
@@ -439,9 +440,10 @@ const CVBuilder: React.FC = () => {
         const data = await res.json();
         const list: PreviousCV[] = Array.isArray(data?.cv) ? data.cv : [];
         setPreviousCVs(list);
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error('Load previous CVs error:', e);
-        setPrevError(e?.message || 'Could not load previous CVs');
+        const msg = e instanceof Error ? e.message : 'Could not load previous CVs';
+        setPrevError(msg);
         setPreviousCVs([]);
       } finally {
         setPrevLoading(false);
