@@ -1,152 +1,95 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// GET /api/opportunities/jobs - Fetch jobs from RapidAPI
+// GET /api/opportunities/jobs - Fetch jobs from TheirStack
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query') || '';
     const location = searchParams.get('location') || '';
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100); // Default 20, max 100
-    const remote = searchParams.get('remote'); // true, false, or null
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
+    const remote = searchParams.get('remote'); // 'true' | 'false' | null
     const company = searchParams.get('company') || '';
-    const dateFilter = searchParams.get('dateFilter') || '';
+    const description = searchParams.get('description') || '';
     const source = searchParams.get('source') || '';
 
-    const rapidApiKey = process.env.RAPID_API_KEY || process.env['X-RAPIDAPI-KEY'];
-    if (!rapidApiKey) {
+    const theirstackKey = process.env.THEIRSTACK_API_KEY;
+    if (!theirstackKey) {
       return NextResponse.json(
-        { error: 'RapidAPI key not configured' },
+        { error: 'TheirStack API key not configured (set THEIRSTACK_API_KEY)' },
         { status: 500 }
       );
     }
 
-    // Calculate offset for pagination
-    const offset = (page - 1) * limit;
+    // Build TheirStack search body (page is 0-based)
+    const body: any = {
+      page: Math.max(0, page - 1),
+      limit,
+      posted_at_max_age_days: 7,
+    };
 
-    // Build API URL with comprehensive parameters
-    const apiUrl = new URL('https://active-jobs-db.p.rapidapi.com/active-ats-7d');
-    
-    // Pagination parameters - use larger limit to get more data for better pagination
-    apiUrl.searchParams.append('limit', '100'); // Get max to have enough data
-    apiUrl.searchParams.append('offset', offset.toString());
-    
-    // Search filters
-    if (query) {
-      apiUrl.searchParams.append('title_filter', `"${query}"`);
-    }
-    
-    if (location) {
-      apiUrl.searchParams.append('location_filter', `"${location}" OR "United Kingdom" OR "United States"`);
-    }
-    
-    // Remote work filter
-    if (remote === 'true') {
-      apiUrl.searchParams.append('remote', 'true');
-    } else if (remote === 'false') {
-      apiUrl.searchParams.append('remote', 'false');
-    }
-    
-    // Company filter
-    if (company) {
-      apiUrl.searchParams.append('organization_filter', company);
-    }
-    
-    // Date filter (recent jobs)
-    if (dateFilter) {
-      apiUrl.searchParams.append('date_filter', dateFilter);
-    }
-    
-    // Source filter (ATS platforms)
-    if (source) {
-      apiUrl.searchParams.append('source', source);
-    }
-    
-    // Always include description text
-    apiUrl.searchParams.append('description_type', 'text');
+    if (query) body.job_title_or = [query];
+    if (location) body.job_location_pattern_or = [location];
+    if (remote === 'true') body.remote = true;
+    if (remote === 'false') body.remote = false;
+    if (company) body.company_name_case_insensitive_or = [company];
+    if (description) body.job_description_contains_or = [description];
+    if (source) body.url_domain_or = [source];
 
-    console.log('Fetching jobs from:', apiUrl.toString());
+    console.log('Fetching jobs from TheirStack with body:', JSON.stringify(body));
 
-    const response = await fetch(apiUrl.toString(), {
-      method: 'GET',
+    const response = await fetch('https://api.theirstack.com/v1/jobs/search', {
+      method: 'POST',
       headers: {
-        'x-rapidapi-key': rapidApiKey,
-        'x-rapidapi-host': 'active-jobs-db.p.rapidapi.com'
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${theirstackKey}`
+      },
+      body: JSON.stringify(body)
     });
 
     if (!response.ok) {
-      console.error('RapidAPI response error:', response.status, response.statusText);
+      console.error('TheirStack jobs response error:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Error details:', errorText);
       return NextResponse.json(
-        { error: 'Failed to fetch jobs from API', jobs: [] },
+        { error: 'Failed to fetch jobs from TheirStack', jobs: [] },
         { status: response.status }
       );
     }
 
-    const data = await response.json();
-    console.log('RapidAPI jobs response received:', Array.isArray(data) ? data.length : 'not array');
+    const tsData: { data?: any[]; metadata?: { total_results?: number } } = await response.json();
+    const rows = Array.isArray(tsData?.data) ? tsData.data! : [];
+    console.log('TheirStack jobs received:', rows.length);
 
-    // Transform the API response to match our interface
-    const jobsArray = Array.isArray(data) ? data : [];
-    
-    // Apply client-side pagination to the received data
-    const clientSideLimit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
-    const startIndex = 0; // We already used offset in API call
-    const endIndex = clientSideLimit;
-    const paginatedJobs = jobsArray.slice(startIndex, endIndex);
-    
-    const jobs = paginatedJobs.map((job, index: number) => {
-      // Create unique ID using job ID, page, and index to prevent duplicates
-      const uniqueId = job.id ? `job-${job.id}-p${page}-${index}` : `job-${Date.now()}-p${page}-${index}`;
-      
-      // Extract skills/tags from description text
-      const description = job.description_text || '';
-      const skillsMatch = description.match(/(?:skills?|technologies?|experience)[^.]*(?:SQL|Python|JavaScript|React|Node|Azure|AWS|Java|C\+\+|HTML|CSS)/gi) || [];
-      const tags = [...new Set(skillsMatch.flatMap(match => 
-        match.match(/\b(?:SQL|Python|JavaScript|React|Node|Azure|AWS|Java|C\+\+|HTML|CSS|Angular|Vue|TypeScript|Docker|Kubernetes)\b/gi) || []
-      ))].slice(0, 5);
-
-      // Handle salary object properly
-      let salaryString = undefined;
-      if (job.salary_raw) {
-        if (typeof job.salary_raw === 'object' && job.salary_raw.value) {
-          // Handle salary object with currency
-          const currency = job.salary_raw.currency || '$';
-          const value = job.salary_raw.value;
-          salaryString = `${currency}${value}`;
-        } else if (typeof job.salary_raw === 'string') {
-          salaryString = job.salary_raw;
-        }
-      }
-
-      // Determine work type based on location_type and remote_derived
-      let workType = 'On-site';
-      if (job.location_type === 'TELECOMMUTE' || job.remote_derived === true) {
-        workType = 'Remote';
-      } else if (job.location_type === 'HYBRID') {
-        workType = 'Hybrid';
-      }
+    const jobs = rows.map((job: any, index: number) => {
+      const uniqueId = `job-${job.id ?? `${Date.now()}-${index}`}-p${page}-${index}`;
+      const workType = job.remote ? 'Remote' : (job.hybrid ? 'Hybrid' : 'On-site');
+      const loc = job.remote ? 'Remote' : (job.locations?.[0]?.display_name || 'Not specified');
+      const tagsFromTech = Array.isArray(job.technology_slugs) ? job.technology_slugs.slice(0, 5) : [];
+      const tags = tagsFromTech.length > 0 ? tagsFromTech : extractTags(job.description || '');
 
       return {
         id: uniqueId,
-        title: job.title || 'Software Developer',
-        company: job.organization || 'Unknown Company',
-        location: job.location_type === 'TELECOMMUTE' ? 'Remote' : (job.locations_derived?.[0] || job.cities_derived?.[0] || 'Not specified'),
+        title: job.job_title || 'Software Developer',
+        company: job.company_object?.name || job.company_domain || job.company_object?.domain || 'Unknown Company',
+        location: loc,
         type: 'Job' as const,
         workType,
-        salary: salaryString,
-        description: job.description_text ? job.description_text.substring(0, 200) + '...' : '',
-        url: job.url || undefined,
+        description: job.description ? job.description.substring(0, 200) + '...' : '',
+        url: job.final_url || job.url || job.source_url || undefined,
         tags: tags.length > 0 ? tags : ['Technology', 'Engineering']
       };
     });
 
+    const total = tsData?.metadata?.total_results ?? (page - 1) * limit + jobs.length;
+    const hasMore = jobs.length === limit;
+
     return NextResponse.json({
       jobs,
-      total: 1000, // Estimate since API doesn't provide total count
+      total,
       page,
-      limit: clientSideLimit,
-      hasMore: jobs.length === clientSideLimit, // Has more if we got full page
+      limit,
+      hasMore,
       currentCount: jobs.length
     });
   } catch (error) {
@@ -156,4 +99,16 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function extractTags(description: string): string[] {
+  const techKeywords = [
+    'JavaScript', 'TypeScript', 'React', 'Vue', 'Angular', 'Node.js',
+    'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Rust',
+    'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis',
+    'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes',
+    'HTML', 'CSS', 'Git', 'Linux', 'REST', 'GraphQL'
+  ];
+  const found = techKeywords.filter(k => description.toLowerCase().includes(k.toLowerCase()));
+  return [...new Set(found)].slice(0, 5);
 }

@@ -29,6 +29,21 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Environment Variables
+
+Set the following variables in a `.env.local` file at the project root:
+
+```bash
+# TheirStack API (jobs and internships search)
+THEIRSTACK_API_KEY=your_theirstack_api_key_here
+
+# Optional legacy RapidAPI keys (no longer required if using TheirStack)
+# RAPID_API_KEY=your_rapidapi_key
+# X-RAPIDAPI-KEY=your_rapidapi_key
+```
+
+The Opportunities dashboard calls `GET /api/opportunities`, which proxies to TheirStack `POST /v1/jobs/search`. Ensure `THEIRSTACK_API_KEY` is set before running the app.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

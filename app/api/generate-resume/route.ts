@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { polishResume } from '../../../lib/aiResume'
 import { buildResumeHTML } from '../../../lib/resumeTemplate'
+import type { ResumeStyle } from '../../../types/resume'
 import { htmlToPDFBuffer } from '../../../lib/pdf'
 import type { ResumeData } from '../../../types/resume'
 
@@ -86,7 +87,8 @@ try {
 
     // 2) HTML template
     const t3 = Date.now()
-    const html = buildResumeHTML(polished)
+    const style: ResumeStyle = (data.templateStyle as ResumeStyle) || 'classic'
+    const html = buildResumeHTML(polished, style)
     const t4 = Date.now()
     console.debug('[generate-resume] buildResumeHTML completed in', t4 - t3, 'ms', 'html length:', html.length)
 

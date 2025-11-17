@@ -1,1 +1,99 @@
-{"polished":{"personalInfo":{"firstName":"Mark","lastName":"Adam","email":"marcalber59@gmail.com","phone":"18325280302","location":"Dallas, TX","title":"Marketing Manager","summary":"\"Results-driven Marketing Manager with a background in software development, leveraging expertise in React, Python, and leadership to drive business growth and innovation. Proven track record of delivering high-impact projects, including a 10-20% website speed improvement at Google, where I was recognized as the region's top software developer.\"","linkedin":"https://www.linkedin.com/in/mark-alber1/","website":"https://mark-alber.vercel.app/"},"education":[{"institution":"Univeristy of Technology","degree":"Bachelor of Computer Science","field":"Computer Science","startDate":"2025-09","endDate":"2026-02","gpa":"","description":"","bullets":["* Currently pursuing a Bachelor of Computer Science at the University of Technology.","* Expected to complete the degree in February 2026."]}],"workExperience":[{"company":"Google","position":"Software Engineer","startDate":"2020-01","endDate":"2025-02","description":"worked and made 120 thousand lines of code and made the website faster by 10-20 percent and won the honor of the best software developer on the region","location":"Dallas, TX","current":false,"bullets":["Developed and maintained 120,000+ lines of high-quality code to drive software innovation at Google.","Improved website performance by 10-20% through strategic coding and optimization techniques.","Achieved regional recognition as the Best Software Developer, solidifying expertise in software development."]}],"skills":[{"name":"React","level":"Advanced","category":"Frameworks & Libraries"},{"name":"Leadership","level":"Intermediate","category":"Soft Skills"},{"name":"Python","level":"Expert","category":"Programming Languages"}],"projects":[{"name":"Mobile App","description":"Made the UI and the frontend and backend made 12+ features made the api faster by 15 percent and published iton app store","technologies":"React, Node.js, i18n, Flutter","url":"","startDate":"","endDate":""}],"achievements":[],"generatedAt":"2025-11-09T23:26:58.323Z","skillsLine":"React, Leadership, Python","projectsPolished":[{"name":"Mobile App","description":"Designed and developed a mobile app using React, Node.js, and i18n, resulting in a 15% increase in API speed and 12+ features.","technologies":"React, Node.js, i18n, Flutter","url":"https://example.com/mobile-app","startDate":"2020-01","endDate":"2020-06"}],"meta":{"provider":"groq","model":"llama-3.1-8b-instant","polishedAt":"2025-11-10T00:53:35.524Z"}},"debug":{"timings":{"start":1762736013402,"polishMs":3007,"totalMs":3012},"provider":"groq","model":"llama-3.1-8b-instant","polishedSize":2598,"htmlPreviewLength":2844,"samplePersonalInfo":{"firstName":"Mark","lastName":"Adam"}}}
+{
+  "polished": {
+    "personalInfo": {
+      "firstName": "Mark",
+      "lastName": "Adam",
+      "email": "marcalber59@gmail.com",
+      "phone": "18325280302",
+      "location": "Dallas, TX",
+      "title": "Marketing Manager",
+      "summary": "\"Results-driven Marketing Manager with a background in software development, leveraging expertise in React, Python, and leadership to drive business growth and innovation. Proven track record of delivering high-impact projects, including a 10-20% website speed improvement at Google, where I was recognized as the region's top software developer.\"",
+      "linkedin": "https://www.linkedin.com/in/mark-alber1/",
+      "website": "https://mark-alber.vercel.app/"
+    },
+    "education": [
+      {
+        "institution": "Univeristy of Technology",
+        "degree": "Bachelor of Computer Science",
+        "field": "Computer Science",
+        "startDate": "2025-09",
+        "endDate": "2026-02",
+        "gpa": "",
+        "description": "",
+        "bullets": [
+          "* Currently pursuing a Bachelor of Computer Science at the University of Technology.",
+          "* Expected to complete the degree in February 2026."
+        ]
+      }
+    ],
+    "workExperience": [
+      {
+        "company": "Google",
+        "position": "Software Engineer",
+        "startDate": "2020-01",
+        "endDate": "2025-02",
+        "description": "worked and made 120 thousand lines of code and made the website faster by 10-20 percent and won the honor of the best software developer on the region",
+        "location": "Dallas, TX",
+        "current": false,
+        "bullets": [
+          "Developed and maintained 120,000+ lines of high-quality code to drive software innovation at Google.",
+          "Improved website performance by 10-20% through strategic coding and optimization techniques.",
+          "Achieved regional recognition as the Best Software Developer, solidifying expertise in software development."
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "name": "React",
+        "level": "Advanced",
+        "category": "Frameworks & Libraries"
+      },
+      {
+        "name": "Leadership",
+        "level": "Intermediate",
+        "category": "Soft Skills"
+      },
+      {
+        "name": "Python",
+        "level": "Expert",
+        "category": "Programming Languages"
+      }
+    ],
+    "projects": [
+      {
+        "name": "Mobile App",
+        "description": "Made the UI and the frontend and backend made 12+ features made the api faster by 15 percent and published iton app store",
+        "technologies": "React, Node.js, i18n, Flutter",
+        "url": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    ],
+    "achievements": [],
+    "generatedAt": "2025-11-09T23:26:58.323Z",
+    "skillsLine": "React, Leadership, Python",
+    "projectsPolished": [
+      {
+        "name": "Mobile App",
+        "description": "Designed and developed a mobile app using React, Node.js, and i18n, resulting in a 15% increase in API speed and 12+ features.",
+        "technologies": "React, Node.js, i18n, Flutter",
+        "url": "https://example.com/mobile-app",
+        "startDate": "2020-01",
+        "endDate": "2020-06"
+      }
+    ],
+    "meta": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "polishedAt": "2025-11-10T00:53:35.524Z"
+    }
+  },
+  "debug": {
+    "timings": { "start": 1762736013402, "polishMs": 3007, "totalMs": 3012 },
+    "provider": "groq",
+    "model": "llama-3.1-8b-instant",
+    "polishedSize": 2598,
+    "htmlPreviewLength": 2844,
+    "samplePersonalInfo": { "firstName": "Mark", "lastName": "Adam" }
+  }
+}

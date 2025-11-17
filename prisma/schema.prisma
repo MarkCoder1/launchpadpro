@@ -34,17 +34,17 @@ model Skills {
 }
 
 model Education {
-  id          String    @id @default(uuid())
-  institution String
-  degree      String
+  id           String    @id @default(uuid())
+  institution  String
+  degree       String
   fieldOfStudy String?
-  startDate   DateTime
-  endDate     DateTime?
-  description String?
-  isCurrently Boolean   @default(false)
-  userId      String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  startDate    DateTime
+  endDate      DateTime?
+  description  String?
+  isCurrently  Boolean   @default(false)
+  userId       String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@map("education")
 }
@@ -63,4 +63,13 @@ model Experience {
   updatedAt   DateTime  @updatedAt
 
   @@map("experience")
+}
+
+model CV {
+  id        String   @id @default(uuid())
+  fileUrl   String
+  createdAt DateTime @default(now())
+  userId    String
+  style     String? // Optional field for CV style/template
+  name      String?
 }

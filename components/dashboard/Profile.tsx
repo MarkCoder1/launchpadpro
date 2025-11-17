@@ -119,6 +119,24 @@ export default function Profile() {
     )
   }
 
+  const handleExportCV = async () => {
+    try {
+      const response = await fetch('/api/cv/get');
+      if (!response.ok) {
+        throw new Error('Failed to fetch CV');
+      }
+      const data = await response.json();
+      if (data.cv && data.cv.fileUrl) {
+        window.open(data.cv.fileUrl, '_blank');
+      } else {
+        alert('No CV available to export.');
+      }
+    } catch (error) {
+      console.error('Error exporting CV:', error);
+      alert('Failed to export CV.');
+    }
+  };
+
   return (
     <div className="space-y-6 lg:space-y-8">
       <div>
@@ -338,7 +356,7 @@ export default function Profile() {
             <Button variant="outline" className="w-full sm:w-auto text-sm">
               Download Profile Data
             </Button>
-            <Button variant="outline" className="w-full sm:w-auto text-sm">
+            <Button variant="outline" className="w-full sm:w-auto text-sm" onClick={handleExportCV}>
               Export CV
             </Button>
           </div>

@@ -243,7 +243,6 @@ export default function Opportunities() {
                 onChange={(e) => handleFilterChange('type', e.target.value)}
                 className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="all">All Types</option>
                 <option value="jobs">Jobs</option>
                 <option value="internships">Internships</option>
                 <option value="volunteers">Volunteers</option>
@@ -283,34 +282,9 @@ export default function Opportunities() {
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filters.type !== 'volunteers' && (
-                <select 
-                  value={filters.source} 
-                  onChange={(e) => handleFilterChange('source', e.target.value)}
-                  className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">All Job Boards</option>
-                  <option value="workday">Workday</option>
-                  <option value="greenhouse">Greenhouse</option>
-                  <option value="lever.co">Lever</option>
-                  <option value="smartrecruiters">SmartRecruiters</option>
-                  <option value="workable">Workable</option>
-                  <option value="bamboohr">BambooHR</option>
-                  <option value="icims">iCIMS</option>
-                  <option value="successfactors">SuccessFactors</option>
-                </select>
-              )}
+
               
-              {filters.type !== 'volunteers' && (
-                <input
-                  type="text"
-                  placeholder="Exclude Company (e.g., Avoid this company)"
-                  value={filters.excludeCompany}
-                  onChange={(e) => handleFilterChange('excludeCompany', e.target.value)}
-                  className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  title="Exclude jobs from specific companies"
-                />
-              )}
+        
               
               {filters.type !== 'volunteers' && (
                 <input

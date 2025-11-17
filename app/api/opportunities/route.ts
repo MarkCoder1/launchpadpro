@@ -13,18 +13,26 @@ interface OpportunityFilters {
   limit: number;
 }
 
-interface RapidAPIJob {
-  id: string;
-  title: string;
-  organization: string;
-  location_type?: string;
-  locations_derived?: string[];
-  cities_derived?: string[];
-  remote_derived?: boolean;
-  salary_raw?: string ;
-  description_text?: string;
+interface TheirStackJob {
+  id?: number | string;
+  job_title?: string;
   url?: string;
-  [key: string]: string | number | boolean | string[] | undefined;
+  final_url?: string;
+  source_url?: string;
+  date_posted?: string;
+  remote?: boolean;
+  hybrid?: boolean;
+  salary_string?: string;
+  description?: string;
+  company_domain?: string;
+  company_object?: {
+    name?: string;
+    domain?: string;
+    linkedin_url?: string;
+  };
+  locations?: Array<{ display_name?: string }>;
+  technology_slugs?: string[];
+  [key: string]: any;
 }
 
 interface VolunteerOpportunity {
@@ -75,7 +83,7 @@ interface Opportunity {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    
+
     // Parse filters
     const filters: OpportunityFilters = {
       query: searchParams.get('query') || '',
@@ -90,87 +98,53 @@ export async function GET(req: NextRequest) {
       limit: Math.min(parseInt(searchParams.get('limit') || '20'), 100)
     };
 
-    // Handle volunteers separately from jobs/internships
+    // Handle volunteers separately
     if (filters.type === 'volunteers') {
       return await fetchVolunteers(filters);
     }
 
-    // For jobs and internships, use RapidAPI
-    const rapidApiKey = process.env.RAPID_API_KEY || process.env['X-RAPIDAPI-KEY'];
-    if (!rapidApiKey) {
+    // TheirStack API key
+    const theirstackKey = process.env.THEIRSTACK_API_KEY;
+    if (!theirstackKey) {
       return NextResponse.json(
-        { error: 'RapidAPI key not configured' },
+        { error: 'TheirStack API key not configured (set THEIRSTACK_API_KEY)' },
         { status: 500 }
       );
     }
 
-    // Calculate offset for pagination
-    const offset = (filters.page - 1) * filters.limit;
+    // Build TheirStack body (page is 0-based)
+    const body: any = {
+      page: Math.max(0, filters.page - 1),
+      limit: filters.limit,
+      posted_at_max_age_days: 7,
+    };
 
-    // Build API URL with comprehensive filters
-    const apiUrl = new URL('https://active-jobs-db.p.rapidapi.com/active-ats-7d');
-    apiUrl.searchParams.append('limit', filters.limit.toString());
-    apiUrl.searchParams.append('offset', offset.toString());
-    apiUrl.searchParams.append('description_type', 'text');
-
-    // Apply filters based on type
+    if (filters.query) body.job_title_or = [filters.query];
     if (filters.type === 'internships') {
-      // For internships, search for internship-related terms
-      if (filters.query) {
-        apiUrl.searchParams.append('title_filter', `${filters.query} intern`);
-      } else {
-        apiUrl.searchParams.append('title_filter', 'intern');
-      }
-    } else if (filters.query) {
-      // For jobs or all, use regular title filter
-      apiUrl.searchParams.append('title_filter', filters.query);
+      body.employment_statuses_or = ['internship'];
+      body.job_title_pattern_or = ['intern', 'internship', 'graduate', 'entry level', 'junior', 'trainee'];
     }
+    if (filters.location) body.job_location_pattern_or = [filters.location];
+    if (filters.remote) body.remote = filters.remote === 'true';
+    if (filters.company) body.company_name_case_insensitive_or = [filters.company];
+    if (filters.excludeCompany) body.company_name_not = [filters.excludeCompany];
+    if (filters.description) body.job_description_contains_or = [filters.description];
+    if (filters.source) body.url_domain_or = [filters.source];
 
-    // Location filter
-    if (filters.location) {
-      apiUrl.searchParams.append('location_filter', `"${filters.location}"`);
-    }
+    console.log('Fetching opportunities from TheirStack with body:', JSON.stringify(body));
 
-    // Remote filter
-    if (filters.remote) {
-      apiUrl.searchParams.append('remote', filters.remote);
-    }
-
-    // Company filters
-    if (filters.company) {
-      apiUrl.searchParams.append('organization_filter', filters.company);
-    }
-
-    if (filters.excludeCompany) {
-      apiUrl.searchParams.append('organization_exclusion_filter', filters.excludeCompany);
-    }
-
-    // Description filter
-    if (filters.description) {
-      apiUrl.searchParams.append('description_filter', filters.description);
-    }
-
-    // Source filter
-    if (filters.source) {
-      apiUrl.searchParams.append('source', filters.source);
-    }
-
-    console.log('Fetching opportunities from:', apiUrl.toString());
-
-    // Make API call
-    const response = await fetch(apiUrl.toString(), {
-      method: 'GET',
+    const response = await fetch('https://api.theirstack.com/v1/jobs/search', {
+      method: 'POST',
       headers: {
-        'x-rapidapi-key': rapidApiKey,
-        'x-rapidapi-host': 'active-jobs-db.p.rapidapi.com'
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${theirstackKey}`
+      },
+      body: JSON.stringify(body)
     });
 
     if (!response.ok) {
-      console.error('RapidAPI response error:', response.status, response.statusText);
       const errorText = await response.text();
-      console.error('Error details:', errorText);
-      
+      console.error('TheirStack response error:', response.status, response.statusText, errorText);
       return NextResponse.json({
         opportunities: [],
         pagination: {
@@ -185,71 +159,49 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const data: RapidAPIJob[] = await response.json();
-    console.log('RapidAPI response received:', Array.isArray(data) ? data.length : 'not array');
-    console.log('Response type:', typeof data);
-    console.log('Response sample:', Array.isArray(data) ? data.slice(0, 2) : data);
+    const tsData: { data?: TheirStackJob[]; metadata?: { total_results?: number } } = await response.json();
+    const rawJobs: TheirStackJob[] = Array.isArray(tsData?.data) ? tsData.data! : [];
+    console.log('TheirStack response received:', rawJobs.length);
 
-    // Transform the data
-    const rawJobs = Array.isArray(data) ? data : [];
-    
-    if (!Array.isArray(data)) {
-      console.warn('API returned non-array response for filters:', filters);
-      console.warn('API URL was:', apiUrl.toString());
-    }
-    
-    // Filter by type if needed (for 'all' type, we may need additional filtering)
-    const filteredJobs = filters.type === 'jobs' 
-      ? rawJobs.filter(job => !isInternshipTitle(job.title || ''))
+    // Filter by type ('jobs' excludes internships)
+    const filteredJobs = filters.type === 'jobs'
+      ? rawJobs.filter(job => !isInternshipTitle((job.job_title || '').toString()))
       : rawJobs;
 
     // Transform to our interface
     const opportunities: Opportunity[] = filteredJobs.map((job, index) => {
-      const uniqueId = `${job.id || Date.now()}-${filters.page}-${index}`;
-      
-      // Determine work type
+      const uniqueId = `${job.id ?? Date.now()}-${filters.page}-${index}`;
+      const isIntern = isInternshipTitle((job.job_title || '').toString());
+      const type: 'Job' | 'Internship' = (filters.type === 'internships' || isIntern) ? 'Internship' : 'Job';
+
       let workType: 'Remote' | 'On-site' | 'Hybrid' = 'On-site';
-      if (job.location_type === 'TELECOMMUTE' || job.remote_derived === true) {
-        workType = 'Remote';
-      } else if (job.location_type === 'HYBRID') {
-        workType = 'Hybrid';
-      }
+      if (job.remote) workType = 'Remote';
+      else if (job.hybrid) workType = 'Hybrid';
 
-      // Determine job type
-      const isInternship = isInternshipTitle(job.title || '');
-      const type: 'Job' | 'Internship' = isInternship ? 'Internship' : 'Job';
-
-      // Extract location
-      const location = job.location_type === 'TELECOMMUTE' 
-        ? 'Remote' 
-        : (job.locations_derived?.[0] || job.cities_derived?.[0] || 'Not specified');
-
-      // Extract skills/tags
-      const tags = extractTags(job.description_text || '');
+      const location = job.remote ? 'Remote' : (job.locations?.[0]?.display_name || 'Not specified');
+      const tagsFromTech = Array.isArray(job.technology_slugs) ? job.technology_slugs.slice(0, 5) : [];
+      const tags = tagsFromTech.length > 0 ? tagsFromTech : extractTags(job.description || '');
 
       return {
         id: uniqueId,
-        title: job.title || 'Position Available',
-        company: job.organization || 'Company',
+        title: job.job_title || 'Position Available',
+        company: job.company_object?.name || job.company_domain || job.company_object?.domain || 'Company',
         location,
         type,
         workType,
-        description: job.description_text 
-          ? job.description_text.substring(0, 200) + '...' 
-          : 'No description available',
-        url: job.url,
+        description: job.description ? job.description.substring(0, 200) + '...' : 'No description available',
+        url: job.final_url || job.url || job.source_url,
         tags: tags.length > 0 ? tags : [type === 'Internship' ? 'Internship' : 'Full-time']
       };
     });
 
-    // Calculate pagination info
-    // Since we don't get total count from API, we estimate based on results
+    // Pagination
+    const totalResults = (tsData?.metadata?.total_results ?? null);
     const hasFullPage = opportunities.length === filters.limit;
-    const estimatedTotal = hasFullPage 
-      ? (filters.page * filters.limit) + filters.limit // Estimate there's at least one more page
-      : (filters.page - 1) * filters.limit + opportunities.length;
-    
-    const totalPages = Math.ceil(estimatedTotal / filters.limit);
+    const estimatedTotal = totalResults !== null && totalResults !== undefined
+      ? totalResults
+      : (hasFullPage ? (filters.page * filters.limit) + filters.limit : (filters.page - 1) * filters.limit + opportunities.length);
+    const totalPages = Math.max(1, Math.ceil(estimatedTotal / filters.limit));
 
     const pagination = {
       currentPage: filters.page,

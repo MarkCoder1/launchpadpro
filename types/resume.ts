@@ -49,6 +49,8 @@ export type ResumeData = {
     date?: string
   }>
   generatedAt?: string
+  /** Optional template style key chosen by the user */
+  templateStyle?: ResumeStyle
 }
 
 export type Provider = 'auto' | 'huggingface' | 'groq'
@@ -60,3 +62,6 @@ export type PolishedResume = ResumeData & {
     polishedAt?: string
   }
 }
+
+// Available resume template styles
+export type ResumeStyle = 'classic' | 'modern' | 'minimal' | 'elegant' | 'compact' | 'creative'
