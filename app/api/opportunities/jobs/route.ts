@@ -1,134 +1,201 @@
 import { NextRequest, NextResponse } from "next/server";
 
-interface TheirStackJob {
-  id?: number | string;
-  job_title?: string;
+// Unified opportunity shape (matches /api/opportunities)
+interface Opportunity {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: 'Job' | 'Internship' | 'Volunteer';
+  workType: 'Remote' | 'On-site' | 'Hybrid';
+  description: string;
   url?: string;
-  final_url?: string;
-  source_url?: string;
-  date_posted?: string;
-  remote?: boolean;
-  hybrid?: boolean;
-  salary_string?: string;
-  description?: string;
-  company_domain?: string;
-  company_object?: {
-    name?: string;
-    domain?: string;
-    linkedin_url?: string;
-  };
-  locations?: Array<{ display_name?: string }>;
-  technology_slugs?: string[];
+  tags: string[];
 }
 
-type TheirStackSearchBody = {
-  page: number;
-  limit: number;
-  posted_at_max_age_days: number;
-  job_title_or?: string[];
-  job_location_pattern_or?: string[];
-  remote?: boolean;
-  company_name_case_insensitive_or?: string[];
-  job_description_contains_or?: string[];
-  url_domain_or?: string[];
-};
+// Jooble response types (subset)
+interface JoobleJob {
+  title: string;
+  location: string;
+  company: string;
+  snippet?: string;
+  link: string;
+  updated?: string;
+  salary?: string;
+}
 
-// GET /api/opportunities/jobs - Fetch jobs from TheirStack
+interface JoobleResponse {
+  totalCount?: number;
+  jobs?: JoobleJob[];
+  error?: string;
+}
+
+// GET /api/opportunities/jobs - Fetch jobs from Jobicy
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('query') || '';
-    const location = searchParams.get('location') || '';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
-    const remote = searchParams.get('remote'); // 'true' | 'false' | null
+    const locationRaw = searchParams.get('location') || '';
+    const remoteFlag = (searchParams.get('remote') || '').toLowerCase() === 'true';
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
     const company = searchParams.get('company') || '';
     const description = searchParams.get('description') || '';
-    const source = searchParams.get('source') || '';
+    const includeDebug = (searchParams.get('debug') || '').toLowerCase() === 'true';
+    const date = searchParams.get('date');
 
-    const theirstackKey = process.env.THEIRSTACK_API_KEY;
-    if (!theirstackKey) {
-      return NextResponse.json(
-        { error: 'TheirStack API key not configured (set THEIRSTACK_API_KEY)' },
-        { status: 500 }
-      );
+    // Build Jooble request body
+    const keywordsParts = [query, company, description].map(s => s.trim()).filter(Boolean);
+    let keywords = keywordsParts.join(' ');
+    if (!keywords && !locationRaw && !remoteFlag) {
+      keywords = 'developer';
     }
-
-    // Build TheirStack search body (page is 0-based)
-    const body: TheirStackSearchBody = {
-      page: Math.max(0, page - 1),
-      limit,
-      posted_at_max_age_days: 7,
+    const body: any = {
+      ...(keywords ? { keywords } : {}),
+      ...(locationRaw ? { location: locationRaw } : {}),
+      page,
+      ...(remoteFlag ? { is_remote: true } : {}),
+      ...(date ? { date: Number(date) } : {}),
     };
 
-    if (query) body.job_title_or = [query];
-    if (location) body.job_location_pattern_or = [location];
-    if (remote === 'true') body.remote = true;
-    if (remote === 'false') body.remote = false;
-    if (company) body.company_name_case_insensitive_or = [company];
-    if (description) body.job_description_contains_or = [description];
-    if (source) body.url_domain_or = [source];
+    const apiKey = process.env.JOOBLE_KEY;
+    if (!apiKey) {
+      console.error('[Jobs] Missing JOOBLE_KEY env var');
+      return NextResponse.json({
+        opportunities: [],
+        pagination: { currentPage: page, totalPages: 1, totalItems: 0, itemsPerPage: limit, hasNextPage: false, hasPrevPage: page > 1 },
+        error: 'Server not configured: set JOOBLE_KEY in environment.'
+      }, { status: 500 });
+    }
 
-    console.log('Fetching jobs from TheirStack with body:', JSON.stringify(body));
+    const url = `https://jooble.org/api/${apiKey}`;
+    console.log('[Jobs] Jooble request:', { url, body });
 
-    const response = await fetch('https://api.theirstack.com/v1/jobs/search', {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${theirstackKey}`
+        'Accept': 'application/json',
+        'User-Agent': 'LaunchpadPro/1.0 (+https://github.com/lionzak/launchpadpro)'
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      cache: 'no-store'
     });
 
     if (!response.ok) {
-      console.error('TheirStack jobs response error:', response.status, response.statusText);
-      const errorText = await response.text();
-      console.error('Error details:', errorText);
+      const errorText = await response.text().catch(() => response.statusText);
+      console.error('[Jobs] Jooble response error:', response.status, errorText);
       return NextResponse.json(
-        { error: 'Failed to fetch jobs from TheirStack', jobs: [] },
+        {
+          opportunities: [],
+          pagination: {
+            currentPage: page,
+            totalPages: 1,
+            totalItems: 0,
+            itemsPerPage: limit,
+            hasNextPage: false,
+            hasPrevPage: page > 1
+          },
+          error: 'Failed to fetch jobs from Jooble. Provide a search term or location.'
+        },
         { status: response.status }
       );
     }
 
-    const tsData: { data?: TheirStackJob[]; metadata?: { total_results?: number } } = await response.json();
-    const rows: TheirStackJob[] = Array.isArray(tsData?.data) ? tsData.data! : [];
-    console.log('TheirStack jobs received:', rows.length);
+    let rows: JoobleJob[] = [];
+    let totalCount = 0;
+    try {
+      const data: JoobleResponse = await response.json();
+      rows = Array.isArray(data.jobs) ? data.jobs : [];
+      totalCount = typeof data.totalCount === 'number' ? data.totalCount : rows.length;
+      console.log('[Jobs] Jooble received:', rows.length, 'totalCount:', totalCount);
+    } catch (e) {
+      const text = await response.text().catch(() => '<unreadable>');
+      console.warn('[Jobs] Parse error, first 200 chars:', text.slice(0, 200));
+      rows = [];
+    }
+    // Apply strict location inclusion post-filter if location provided (Jooble should filter, this ensures consistency)
+    let filteredRows = rows;
+    if (!remoteFlag && locationRaw.trim()) {
+      const needle = locationRaw.trim().toLowerCase();
+      filteredRows = filteredRows.filter(j => (j.location || '').toLowerCase().includes(needle));
+    }
 
-    const jobs = rows.map((job: TheirStackJob, index: number) => {
-      const uniqueId = `job-${job.id ?? `${Date.now()}-${index}`}-p${page}-${index}`;
-      const workType = job.remote ? 'Remote' : (job.hybrid ? 'Hybrid' : 'On-site');
-      const loc = job.remote ? 'Remote' : (job.locations?.[0]?.display_name || 'Not specified');
-      const tagsFromTech = Array.isArray(job.technology_slugs) ? job.technology_slugs.slice(0, 5) : [];
-      const tags = tagsFromTech.length > 0 ? tagsFromTech : extractTags(job.description || '');
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    // Jooble already paginates; don't re-slice beyond current page size but keep guard
+    const pageRows = start < filteredRows.length ? filteredRows.slice(start, end) : filteredRows;
+
+    const opportunities: Opportunity[] = pageRows.map((job: JoobleJob, index: number) => {
+      const uniqueId = `jooble-${hashString(job.link || job.title || '')}-p${page}-${index}`;
+      const loc = job.location || (remoteFlag ? 'Remote' : 'Various Locations');
+      const snippet = (job.snippet && job.snippet.trim()) ? job.snippet.trim() : '';
+      const derived = extractTags(`${job.title || ''} ${snippet}`);
+      const tags = [...derived].filter(Boolean).slice(0, 5);
+      const workType: 'Remote' | 'On-site' | 'Hybrid' = remoteFlag || /remote|anywhere/i.test(loc) ? 'Remote' : 'On-site';
 
       return {
         id: uniqueId,
-        title: job.job_title || 'Software Developer',
-        company: job.company_object?.name || job.company_domain || job.company_object?.domain || 'Unknown Company',
+        title: job.title || 'Job Opportunity',
+        company: job.company || 'Company',
         location: loc,
-        type: 'Job' as const,
+        type: isInternshipTitle(job.title || '') ? 'Internship' : 'Job',
         workType,
-        description: job.description ? job.description.substring(0, 200) + '...' : '',
-        url: job.final_url || job.url || job.source_url || undefined,
-        tags: tags.length > 0 ? tags : ['Technology', 'Engineering']
+        description: snippet || 'No description available',
+        url: job.link || undefined,
+        tags: tags.length ? tags : [workType]
       };
     });
 
-    const total = tsData?.metadata?.total_results ?? (page - 1) * limit + jobs.length;
-    const hasMore = jobs.length === limit;
+    // Pagination based on locally sliced rows
+    const pageSize = rows.length || limit;
+    const totalItems = totalCount;
+    const totalPages = Math.max(1, Math.ceil((totalItems || 0) / (pageSize || 1)));
+    const hasNextPage = page < totalPages;
 
-    return NextResponse.json({
-      jobs,
-      total,
-      page,
-      limit,
-      hasMore,
-      currentCount: jobs.length
-    });
+    const payload: any = {
+      opportunities,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalItems || opportunities.length,
+        itemsPerPage: pageSize,
+        hasNextPage,
+        hasPrevPage: page > 1
+      },
+      filters: {
+        query,
+        location: locationRaw,
+        remote: remoteFlag || undefined
+      }
+    };
+
+    if (includeDebug) {
+      payload.debug = {
+        url,
+        received: rows.length,
+        totalCount,
+        afterFilter: filteredRows.length,
+        pageInfo: { page, itemsPerPage: pageSize }
+      };
+    }
+
+    return NextResponse.json(payload);
   } catch (error) {
     console.error('Error fetching jobs:', error);
     return NextResponse.json(
-      { error: 'Internal server error while fetching jobs', jobs: [] },
+      {
+        opportunities: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: 20,
+          hasNextPage: false,
+          hasPrevPage: false
+        },
+        error: 'Internal server error while fetching jobs'
+      },
       { status: 500 }
     );
   }
@@ -144,4 +211,23 @@ function extractTags(description: string): string[] {
   ];
   const found = techKeywords.filter(k => description.toLowerCase().includes(k.toLowerCase()));
   return [...new Set(found)].slice(0, 5);
+}
+
+function isInternshipTitle(title: string): boolean {
+  const lower = title.toLowerCase();
+  return lower.includes('intern') || lower.includes('internship') || lower.includes('graduate') || lower.includes('entry level') || lower.includes('junior') || lower.includes('trainee');
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Simple non-crypto hash for stable IDs
+function hashString(str: string): string {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
 }

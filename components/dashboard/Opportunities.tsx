@@ -67,12 +67,15 @@ export default function Opportunities() {
         setLoadingMore(true)
       }
 
+      const trimmedLocation = (filters.location || '').trim()
+      const remoteParam = filters.remote === 'true' ? 'true' : ''
       const params = new URLSearchParams({
         page: pageToFetch.toString(),
         type: filters.type,
+        limit: '20',
         ...(filters.query && { query: filters.query }),
-        ...(filters.location && { location: filters.location }),
-        ...(filters.remote && { remote: filters.remote }),
+        ...(trimmedLocation && { location: trimmedLocation }),
+        ...(remoteParam && { remote: remoteParam }),
         ...(filters.company && { company: filters.company }),
         ...(filters.excludeCompany && { excludeCompany: filters.excludeCompany }),
         ...(filters.description && { description: filters.description }),
@@ -80,7 +83,13 @@ export default function Opportunities() {
       })
 
       setLastFetchTime(Date.now())
-      const response = await fetch(`/api/opportunities?${params}`)
+      const url = `/api/opportunities?${params}`
+      if (typeof window !== 'undefined') {
+        // Lightweight client-side debug to verify params being sent
+        // eslint-disable-next-line no-console
+        console.debug('Fetching opportunities with URL:', url)
+      }
+      const response = await fetch(url)
       const data = await response.json()
 
       if (!response.ok) {
