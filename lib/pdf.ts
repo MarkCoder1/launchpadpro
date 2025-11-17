@@ -6,7 +6,7 @@ export interface PDFOptions {
 }
 
 // Renders provided HTML to a PDF Buffer using Puppeteer.
-export async function htmlToPDFBuffer(html: string, options: PDFOptions = {}): Promise<Buffer> {
+export async function htmlToPDFBuffer(html: string, options: PuppeteerPDFOptions = {}): Promise<Buffer> {
   const browser = await puppeteer.launch({ headless: 'new' })
   try {
     const page = await browser.newPage()

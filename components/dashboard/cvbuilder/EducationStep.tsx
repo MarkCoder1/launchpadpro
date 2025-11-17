@@ -302,7 +302,7 @@ const EducationStep: React.FC<EducationStepProps> = ({
                 <li>List your education in reverse chronological order (most recent first)</li>
                 <li>Include relevant coursework, honors, or achievements if space permits</li>
                 <li>For dates, use YYYY-MM format (e.g., 2024-05 for May 2024)</li>
-                <li>Only include GPA if it's 3.5 or higher (or equivalent)</li>
+                <li>Only include GPA if it&apos;s 3.5 or higher (or equivalent)</li>
               </ul>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
-import { FileText, Upload, ArrowLeft, ArrowRight, Check, Award, Briefcase, FolderOpen, GraduationCap, Plus, User, Zap } from "lucide-react"
+import { FileText, Upload, ArrowLeft, ArrowRight, Check, Zap } from "lucide-react"
 import CVScoreChecker from './CVScoreChecker'
 import PersonalInfoStep from './cvbuilder/PersonalInfoStep';
 import EducationStep from './cvbuilder/EducationStep';
@@ -523,7 +523,7 @@ const CVBuilder: React.FC = () => {
               <p className="mt-2 text-xs text-muted-foreground">
                 {styleDescriptions[templateStyle]}
               </p>
-            
+
             </div>
           </CardContent>
         </Card>

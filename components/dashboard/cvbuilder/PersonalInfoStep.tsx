@@ -122,7 +122,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Personal Information</h3>
-        <p className="text-gray-600 mb-6">Let's start with your basic information. All fields marked with * are required.</p>
+        <p className="text-gray-600 mb-6">Let&apos;s start with your basic information. All fields marked with * are required.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

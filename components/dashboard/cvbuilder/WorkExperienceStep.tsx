@@ -228,7 +228,7 @@ const WorkExperienceStep: React.FC<WorkExperienceStepProps> = ({
               />
               <ErrorMessage index={index} fieldName="description" />
               <p className="text-gray-500 text-sm mt-1">
-                Tip: Focus on achievements rather than just duties. Use action verbs and include metrics (e.g., "Increased sales by 25%").
+                Tip: Focus on achievements rather than just duties. Use action verbs and include metrics (e.g., &quot;Increased sales by 25%&quot;).
               </p>
             </div>
           </div>
@@ -256,9 +256,9 @@ const WorkExperienceStep: React.FC<WorkExperienceStepProps> = ({
             <div className="mt-2 text-sm text-green-700">
               <ul className="list-disc list-inside space-y-1">
                 <li>List experiences in reverse chronological order (most recent first)</li>
-                <li>Use strong action verbs: "Led," "Implemented," "Achieved," "Optimized"</li>
+                <li>Use strong action verbs: &quot;Led,&quot; &quot;Implemented,&quot; &quot;Achieved,&quot; &quot;Optimized&quot;</li>
                 <li>Quantify your impact with numbers, percentages, or dollar amounts</li>
-                <li>Tailor descriptions to match the job you're applying for</li>
+                <li>Tailor descriptions to match the job you&apos;re applying for</li>
                 <li>Keep bullet points concise but impactful (1-2 lines each)</li>
               </ul>
             </div>
