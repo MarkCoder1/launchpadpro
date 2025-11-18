@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
-import { Upload, Loader2, Download, BarChart2 } from 'lucide-react'
+import { Upload, Loader2, Download, BarChart2, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react'
 import { Bar } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 import html2canvas from 'html2canvas'
@@ -22,7 +22,9 @@ const CVScoreChecker: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [report, setReport] = useState<CVScoreReport | null>(null)
-  const reportRef = useRef<HTMLDivElement>(null)
+    const reportRef = useRef<HTMLDivElement>(null)
+    const [showRaw, setShowRaw] = useState(false)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null
@@ -140,17 +142,18 @@ const CVScoreChecker: React.FC = () => {
                 <div className="text-sm text-muted-foreground">Input</div>
                 <div className="text-sm">Type: <span className="font-medium uppercase">{report.inputType}</span></div>
                 {report.fileName && <div className="text-sm break-words">File: {report.fileName}</div>}
-                <div className="text-xs text-muted-foreground">Processed in {report.meta.processingMs} ms (AI: {report.meta.aiProviders?.grammar || 'none'})</div>
+                <div className="text-xs text-muted-foreground">Processed in {report.meta.processingMs} ms • Vision: {report.meta.aiProviders?.vision || 'none'}</div>
+                {report.meta.createdAt && (
+                  <div className="text-xs text-muted-foreground">Generated: {new Date(report.meta.createdAt).toLocaleString()}</div>
+                )}
               </div>
               <div className="p-4 border rounded">
                 <div className="text-sm text-muted-foreground">Sections</div>
-                <ul className="text-sm list-disc pl-4">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {Object.entries(report.sections).map(([k,v]) => (
-                    <li key={k} className={v? 'text-green-600' : 'text-muted-foreground'}>
-                      {k}: {v? 'yes' : 'no'}
-                    </li>
+                    <span key={k} className={`px-2 py-1 text-xs rounded border ${v? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-muted text-muted-foreground'}`}>{k}</span>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
 
@@ -165,6 +168,7 @@ const CVScoreChecker: React.FC = () => {
                       plugins: { legend: { display: false }, title: { display: true, text: 'Category Scores' } },
                       scales: { y: { min: 0, max: 100 } },
                     }}
+                    height={220}
                   />
                 )}
               </div>
@@ -173,11 +177,55 @@ const CVScoreChecker: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="p-4 border rounded">
                 <div className="font-medium mb-2">Keywords</div>
-                <div className="text-sm">Coverage: <span className="font-semibold">{report.keywords.coveragePercent}%</span></div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">Coverage: <span className="font-semibold">{report.keywords.coveragePercent}%</span></div>
+                  {report.keywords.missing.length > 0 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(report.keywords.missing.join(', '))
+                          setCopiedKey('ALL')
+                          setTimeout(() => setCopiedKey(null), 1200)
+                        } catch {}
+                      }}
+                    >
+                      {copiedKey === 'ALL' ? <Check className="h-4 w-4"/> : <Copy className="h-4 w-4"/>}
+                    </Button>
+                  )}
+                </div>
+                {report.keywords.present.length > 0 && (
+                  <div className="text-sm mt-2">
+                    <div className="text-muted-foreground mb-1">Present:</div>
+                    <div className="flex flex-wrap gap-2">{report.keywords.present.slice(0, 30).map(k => <span key={k} className="px-2 py-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 rounded break-words">{k}</span>)}</div>
+                  </div>
+                )}
                 {report.keywords.missing.length > 0 && (
                   <div className="text-sm mt-2">
                     <div className="text-muted-foreground mb-1">Missing examples:</div>
-                    <div className="flex flex-wrap gap-2">{report.keywords.missing.slice(0, 15).map(k => <span key={k} className="px-2 py-1 text-xs bg-muted rounded break-words">{k}</span>)}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {report.keywords.missing.slice(0, 30).map(k => (
+                        <span key={k} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-muted rounded break-words">
+                          <span>{k}</span>
+                          <button
+                            type="button"
+                            aria-label={`Copy ${k}`}
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(k)
+                                setCopiedKey(k)
+                                setTimeout(() => setCopiedKey(null), 1200)
+                              } catch {}
+                            }}
+                            className="opacity-70 hover:opacity-100"
+                          >
+                            {copiedKey === k ? <Check className="h-3.5 w-3.5"/> : <Copy className="h-3.5 w-3.5"/>}
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -203,11 +251,88 @@ const CVScoreChecker: React.FC = () => {
               </div>
               <div className="p-4 border rounded">
                 <div className="font-medium mb-2">Design & Layout</div>
+                <div className="text-xs text-muted-foreground mb-1">Signals: fonts {report.design.fontVariety}, bullets {report.design.bulletUsage}, headers {report.design.hasConsistentHeaders ? 'consistent' : 'inconsistent'}, whitespace {report.design.excessiveWhitespace ? 'excessive' : 'balanced'}, alignment {report.design.alignmentSignals}</div>
                 <ul className="list-disc pl-4 text-sm">
                   {report.categories.designLayout.suggestions.map((s, i) => <li key={i} className="break-words">{s}</li>)}
                 </ul>
               </div>
             </div>
+
+            {report.recommendations && (
+              <div className="p-4 border rounded">
+                <div className="font-medium mb-2">Recommendations</div>
+                {report.recommendations.quickWins && report.recommendations.quickWins.length > 0 && (
+                  <div className="mb-3">
+                    <div className="text-sm text-muted-foreground mb-1">Quick Wins</div>
+                    <ul className="list-disc pl-4 text-sm">
+                      {report.recommendations.quickWins.slice(0, 6).map((s, i) => <li key={i} className="break-words">{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {(report.recommendations.addKeywords?.length ?? 0) > 0 && (
+                  <div className="mb-3">
+                    <div className="text-sm text-muted-foreground mb-1">Add Keywords</div>
+                    <div className="flex flex-wrap gap-2">
+                      {report.recommendations.addKeywords.slice(0, 24).map((k) => (
+                        <span key={k} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-amber-50 text-amber-800 border border-amber-200 rounded">
+                          <span>{k}</span>
+                          <button
+                            type="button"
+                            aria-label={`Copy ${k}`}
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(k)
+                                setCopiedKey(`rec_kw_${k}`)
+                                setTimeout(() => setCopiedKey(null), 1200)
+                              } catch {}
+                            }}
+                            className="opacity-70 hover:opacity-100"
+                          >
+                            {copiedKey === `rec_kw_${k}` ? <Check className="h-3.5 w-3.5"/> : <Copy className="h-3.5 w-3.5"/>}
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(report.recommendations.addSections?.length ?? 0) > 0 && (
+                  <div className="mb-3">
+                    <div className="text-sm text-muted-foreground mb-1">Add Sections</div>
+                    <div className="flex flex-wrap gap-2">
+                      {report.recommendations.addSections.slice(0, 12).map((s) => (
+                        <span key={s} className="px-2 py-1 text-xs bg-sky-50 text-sky-800 border border-sky-200 rounded">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {(report.recommendations.bulletExamples?.length ?? 0) > 0 && (
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Bullet Examples</div>
+                    <ul className="list-disc pl-4 text-sm">
+                      {report.recommendations.bulletExamples.slice(0, 6).map((b, i) => (
+                        <li key={i} className="break-words flex items-start gap-2">
+                          <span className="flex-1">{b}</span>
+                          <button
+                            type="button"
+                            aria-label="Copy bullet"
+                            onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(b)
+                                setCopiedKey(`rec_b_${i}`)
+                                setTimeout(() => setCopiedKey(null), 1200)
+                              } catch {}
+                            }}
+                            className="opacity-70 hover:opacity-100 mt-[-2px]"
+                          >
+                            {copiedKey === `rec_b_${i}` ? <Check className="h-3.5 w-3.5"/> : <Copy className="h-3.5 w-3.5"/>}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="p-4 border rounded">
               <div className="font-medium mb-2">Experience & Skills Relevance</div>
@@ -216,6 +341,26 @@ const CVScoreChecker: React.FC = () => {
                 {report.categories.experienceRelevance.suggestions.map((s, i) => <li key={`s-${i}`} className="break-words">{s}</li>)}
               </ul>
             </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="p-4 border rounded">
+                <div className="font-medium mb-2">Readability</div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  <div>Flesch-Kincaid Grade:</div><div className="font-medium">{report.readability.fleschKincaidGrade ?? '—'}</div>
+                  <div>Coleman-Liau Index:</div><div className="font-medium">{report.readability.colemanLiauIndex ?? '—'}</div>
+                  <div>Reading Ease:</div><div className="font-medium">{report.readability.readingEase ?? '—'}</div>
+                  <div>Avg Sentence Length:</div><div className="font-medium">{report.readability.avgSentenceLength ?? '—'}</div>
+                  <div>Complex Sentence Ratio:</div><div className="font-medium">{report.readability.complexSentenceRatio ?? '—'}</div>
+                </div>
+              </div>
+              <div className="p-4 border rounded">
+                <div className="font-medium mb-2">Extracted Text (preview)</div>
+                <div className="text-xs text-muted-foreground mb-1">First 600 chars</div>
+                <pre className="text-xs whitespace-pre-wrap max-h-40 overflow-auto border rounded p-2 bg-muted/30">{(report.extractedText || '').slice(0, 600) || '—'}</pre>
+              </div>
+            </div>
+
+            
           </CardContent>
         </Card>
       )}

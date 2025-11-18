@@ -56,6 +56,17 @@ export interface DesignSignals {
 	alignmentSignals: 'good' | 'mixed' | 'poor'
 }
 
+export interface CVRecommendations {
+	// Short, actionable items a candidate can do quickly (<= 6)
+	quickWins: string[]
+	// Keywords/skills from the JD to explicitly add or emphasize
+	addKeywords: string[]
+	// Sections that would help strengthen the CV (e.g., Projects, Achievements)
+	addSections: string[]
+	// Ready-to-copy example bullets tailored to the JD (concise)
+	bulletExamples: string[]
+}
+
 // Optional low-level PDF-derived line features to aid AI analysis of structure/design
 export interface LineFeature {
 	page: number
@@ -79,6 +90,7 @@ export interface CVScoreReport {
 	keywords: KeywordAnalysis
 	readability: ReadabilityMetrics
 	design: DesignSignals
+	recommendations: CVRecommendations
 	categories: {
 		keywordMatch: CategoryScoreDetail
 		structureFormatting: CategoryScoreDetail
